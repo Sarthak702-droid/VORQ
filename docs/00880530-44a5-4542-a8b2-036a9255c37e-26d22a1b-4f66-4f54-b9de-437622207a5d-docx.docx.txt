@@ -1,0 +1,162 @@
+VORQ | Product Requirements Document
+Version 1.0 | Product concept and implementation baseline | 03 November 2026 | Working brand: trademark not cleared
+# 1. Executive product decision
+VORQ is one role-aware construction operations and financial-control platform for Indian small and mid-sized residential contractors. It must present one brand, one sign-in, one coherent navigation system, and a trustworthy view of project cost, material use, labour, billing, and cash exposure. The target customer is a contractor managing 2-5 concurrent residential or low-rise commercial projects in the Bhubaneswar-Cuttack region, expanding to similar Indian markets only after paid pilot validation.
+The product strategy is maximum reuse of existing open-source business logic and user-interface components, not a rewrite. Frappe/ERPNext v16 provides the authoritative finance, inventory and procurement foundation; BuildSuite Core v16 provides construction workflows and the primary customer-facing interface. OpenConstructionERP, OpenProject and Cepho are strategic sources of specialist functionality subject to licensing, compatibility and integration gates. No five-codebase big-bang merger.
+# 2. Business problem, value and positioning
+## 2.1 Validated hypothesis, not proven demand
+Contractors commonly spread data across site notebooks, spreadsheets, accountant systems, WhatsApp and supplier bills. VORQ hypothesizes that the financially painful gap is not missing dashboards but late and inconsistent reconciliation between BOQ, on-site consumption, purchase commitments, labour cost, client billing and collections. This hypothesis must be validated locally; it is not a measured market fact.
+## 2.2 Jobs to be done
+Owner: know which projects are profitable, over budget, behind schedule, and short of cash without calling five employees.
+Project manager: see planned vs actual scope, costs, tasks, dependencies and approvals at project level.
+Site engineer: file accurate daily progress, labour and materials from a phone in poor connectivity.
+Accountant: trust posted bills, taxes, payment status and reconciliation; never rekey the same transaction twice.
+Quantity surveyor: maintain approved BOQ revisions, measured quantities, cost codes and client/subcontract billing references.
+Storekeeper / procurement: know stock on site, requests, receipts, transfers and consumption.
+## 2.3 Non-negotiable value promise
+Every report must trace its amounts back to source records and document status. A visual KPI without a reconciled data source must be clearly marked unavailable, not fabricated. VORQ will not claim automatic cost savings or predictive accuracy without evidence.
+# 3. Ideal customer profile and commercial assumptions
+Dimension	First-release target	Disqualifier / caution
+Active projects	2-5 concurrent sites	One-off homeowner with no repeat workflow
+Contract types	Residential houses, duplexes, small apartment and low-rise commercial work	Large government EPC contracts as initial focus
+Operational team	Owner, 1 accountant, 1-5 site staff, optional QS and storekeeper	No person willing to enter daily site data
+System today	Excel, WhatsApp, registers, Tally or manual accounting	Custom mature ERP with no migration appetite
+Proposed pilot price	INR 3,000-6,000 per company/month, to validate	Do not publish as proven willingness to pay
+Sales model	Founder-led on-site discovery + paid proof-of-value	No broad national paid advertising before validation
+
+## 3.1 Launch hypotheses and gates
+Interview 20 contractors; obtain real anonymized process examples from at least 10.
+Complete 5 workflow demonstrations against customer data; obtain at least 3 paid pilot commitments.
+Require a named daily-data champion in every pilot company and a finance approver.
+Decide go/no-go from paid adoption, usable data completeness, implementation hours and renewal intent; do not use downloads as proof of product-market fit.
+# 4. Personas, roles and access
+Role	Main landing	Create / modify	Restricted actions
+Owner / Director	Portfolio and cash risk	Approvals, access grants within company, high-level budgets	Cannot bypass audit trail
+Project Manager	My projects and schedule	Project plans, work packages, site approvals	No unrestricted GL editing
+Quantity Surveyor	BOQ and measurement	Estimates, BOQ drafts, measurement books	Cannot post sales invoice without permission
+Site Engineer	Today's site work	Daily site report, progress, photo, field attendance	No global company financials
+Storekeeper	Material operations	Receipts, issues, transfers within assigned stores	Cannot modify approved rates or journals
+Procurement Officer	Requests and purchase orders	Vendor quotes, PO drafts, purchase approvals by policy	No payment posting
+Accountant	Billing, payments and reconciliation	Invoices, payments, accounting entries in ERPNext	Cannot approve own sensitive transactions if maker-checker enabled
+Subcontractor (external)	My work and payment status	Own submissions or measured progress if invited	No access to other vendors, payroll or portfolio
+Platform Operator	Deployment health	Backup, upgrades and break-glass support	No routine access to tenant commercial data
+
+Access = tenant isolation + project membership + role permissions + workflow state + explicit approval limits. Hiding a navigation item is not authorization. The server enforces every check.
+# 5. Feature inventory and release priorities
+ID	Module / capability	Release	Authoritative system / reuse source
+F01	Company onboarding, users, roles and project scope	P0	Frappe roles, User Permissions and custom policies
+F02	Project, stages, work packages, cost codes	P0	BuildSuite Core + ERPNext Project
+F03	BOQ versioning, rate library, approved baseline	P0	BuildSuite; export/import; one canonical version
+F04	Daily progress, site log, photos and exceptions	P0	BuildSuite site execution, mobile optimization
+F05	Labour muster, crews and wage costing	P0	BuildSuite workforce, validated extensions
+F06	Material request, PO, receipt and consumption	P0	BuildSuite workflow -> ERPNext stock/procurement
+F07	Budget vs actual + committed cost dashboard	P0	ERPNext accounting + BuildSuite reports
+F08	Subcontract work order, measured bill, retention	P0	BuildSuite subcontract module
+F09	Basic client invoice / milestone tracking	P0 limited	ERPNext Sales Invoice; no custom GL
+F10	Cash, receivables, payables and alerts	P0	ERPNext finance and project links
+F11	Mobile site PWA with local drafts	P0 limited	Reuse BuildSuite UI; new minimal field UX only
+F12	Advanced client RA billing / IPC / retention	P1	Adapt Cepho patterns to v16 after tests
+F13	Offline sync of approved field capture	P1	PWA queue and server idempotency
+F14	Supplier quotation comparison and approvals	P1	ERPNext + custom approval configurations
+F15	Advanced Gantt/critical dependencies	P1 conditional	Prefer BuildSuite Gantt; OpenProject API only for gap
+F16	Detailed BOQ grid and PDF/CAD/BIM takeoff	P2 gated	OpenConstructionERP under approved license
+F17	Forecasting, mobile push, Hindi/Odia support	P2	Customer-validated extensions
+F18	Native Android app, enterprise ERP integrations	Future conditional	Only after field PWA or integration need proven
+
+P0 is a scoped pilot, not a promise to build every edge case. The full combined vision is retained in the roadmap but not shipped without validation.
+# 6. End-to-end user workflows
+## 6.1 Onboard and control access
+Owner is invited to tenant site, selects company, invites employees with role and project scope, and verifies onboarding. An external subcontractor gets a separate restricted portal role. All invitations expire; all assignment changes are audited. A user with no assigned project sees no cross-project records even via direct API calls.
+## 6.2 Create project and budget baseline
+Project Manager creates project with client, contract value, dates, site location, manager and company. QS imports or enters BOQ items with code, description, unit, quantity, unit rate and material/labour cost classifications. Draft revisions are editable, submitted revision becomes immutable baseline; changes use a formal change order and approval. Every downstream cost record references a cost code; project-level variance uses approved baseline.
+## 6.3 Procure and consume material
+Site Engineer requests cement/steel/sand against project task and cost code. Authorized buyer approves and creates PO; storekeeper records receipt with supplier, quantity, unit, batch/attachment where needed; material is issued or consumed against site and cost code. Exceptions (over-receipt, missing PO, negative stock, return, cancellation) require controlled workflow. Receipt, commitment and consumption must never be conflated as the same expense.
+## 6.4 Daily labour and site progress
+Foreman/site engineer chooses site and date; enters crew muster, hours or shifts, wage categories, task progress, weather/obstructions and evidence photos. Submit creates derived registers once. Duplicate same-site/date submission is blocked or handled by amendment. Offline mode may hold a draft but must not finalize accounting effects until online validation succeeds.
+## 6.5 Subcontract measurement and bill
+QS records subcontract work order/schedule of values, cumulative measured quantity and approved previous quantity; payable = approved measured value - applicable retention - advances properly settled - other approved deductions. BuildSuite creates ERPNext Purchase Invoice only once on approved submit. No duplicated payable on retries; reversal uses cancel/amend.
+## 6.6 Client billing and collections
+P0 supports basic milestone invoice and receivable status in ERPNext. P1 adds RA/IPC measurements, previous certified quantities, retention, recoveries, tax treatment and client approval. Final financial posting remains ERPNext Sales Invoice, with immutable cross-reference to measurement certificate. Tax interpretation must be signed off by accountant/tax counsel.
+## 6.7 Owner financial dashboard
+Show approved budget, actual booked cost, open commitments, expected remaining cost, estimated at completion, receivables, payables and cash gap. Clearly distinguish received, issued, consumed, invoiced, paid and accrued amounts. Drilldown from every KPI to project/cost code/source document; timestamp freshness must be visible.
+# 7. Functional acceptance criteria
+ID	Acceptance criteria - must be demonstrated
+A01	Assigned site user cannot read another tenant's or unassigned project's records by URL, search or API.
+A02	Rejected or draft BOQ does not replace approved baseline; revision history is auditable.
+A03	Every posted project expense shows a source, project, cost code, amount and posting status.
+A04	One submitted subcontract bill produces exactly one linked Purchase Invoice, even after retry.
+A05	Purchase receipt, material issue and consumption produce correct distinct inventory/accounting effects.
+A06	User can correct submitted operational entries only using authorized cancel/amend flow.
+A07	Accountant can reconcile dashboard totals to ERPNext ledger and stock report for test dataset.
+A08	Site report can be saved as mobile draft without network, with clear pending-sync status; no false success.
+A09	Owner can create project, upload BOQ, record labour/material and see supported cost variance end-to-end.
+A10	No mock/placeholder KPI appears as live production data; empty states show reason and next action.
+A11	Client invoice and payment status reflect ERPNext source document lifecycle with no duplicate entry.
+A12	All financial numbers include currency, tax basis and relevant as-of timestamp.
+
+# 8. Explicit out of scope / DO NOT BUILD
+Do NOT rewrite ERPNext general ledger, inventory valuation, tax engine, purchase invoice or payment entry logic.
+Do NOT directly install Cepho v15 on Frappe/ERPNext v16 and call it compatible.
+Do NOT copy OpenConstructionERP AGPL UI into closed-source modules without license review/authorization.
+Do NOT deploy OpenProject merely to duplicate BuildSuite's existing Gantt and scheduling capabilities.
+Do NOT build a second Next.js frontend when existing BuildSuite/Frappe views satisfy the workflow.
+Do NOT create a native Android app, AI estimator, BIM clash detection, government EPC/tender module or real-time GPS tracking in MVP.
+Do NOT calculate project profitability from partial material movements as if they were posted accounting expenses.
+Do NOT give subcontractors global search, global contacts, other supplier payments or company-wide financial access.
+Do NOT promise statutory GST/TDS compliance without accountant review and current rule validation.
+Do NOT sell nationwide before 3 paid pilots demonstrate sustainable onboarding and use.
+# 9. Data, performance, quality and compliance requirements
+Auditability: source-document lineage, immutable submitted records, approval actor and timestamp, detailed exception logs.
+Security: HTTPS, CSRF/session protection, least privilege, rate limits, encrypted backups, secret rotation, verified uploads, environment segregation.
+Tenant isolation: initial Frappe site and MariaDB database per customer; automated backup and restore test, no shared financial tables.
+Mobile: support common Android Chrome screens; primary data-entry flow works on typical mid-range devices and weak networks.
+Targets for pilot acceptance (engineering objectives, not existing SLAs): common list p95 under 2.5 seconds on reference dataset, 99.5% monthly uptime, restore verification, zero critical data-loss/security bugs.
+Availability target is not a contractual guarantee until monitoring and operational readiness are verified.
+Localization: Indian currency formatting, Indian date conventions, GSTIN fields where applicable, UOM controls; English first, Hindi/Odia later.
+Data retention, consent, contract, export and deletion policies require counsel review against applicable Indian privacy and tax recordkeeping obligations.
+# 10. Product KPIs and unit economics
+Metric	Pilot target / meaning	Evidence source
+Paid pilot customers	>=3 committed after live demonstrations	Signed agreement/payment record
+Daily site submission completeness	>=85% scheduled site-days in pilot	Submitted site log / assigned days
+Cost allocation coverage	>=95% posted project costs tagged with project and cost code	ERPNext/BuildSuite GL-linked export
+Critical workflow success	100% of golden-path test cases	E2E test suite
+Reconciliation error	0 unexplained differences in controlled test dataset	Ledger/stock reconciliation
+Onboarding effort	Track hours per customer; reduce each iteration	Implementation timesheets
+Time to first value	First reconciled dashboard within 14 days of setup (hypothesis)	Event logs and onboarding record
+Commercial viability	Gross margin after hosting + support + onboarding amortization	Actual cost ledger
+
+Illustrative revenue only: 5 customers at INR 5,000/month is INR 25,000 MRR, before taxes, support, hosting, salary and churn. Pricing and conversion are hypotheses, not observed benchmarks.
+# 11. Delivery plan and stage gates
+## Gate 0 - Source and legal feasibility (week 1-2, conditional)
+Pin release tags/commit hashes; stand up isolated sandbox; establish Frappe/ERPNext v16 and BuildSuite install; run bookkeeping and permissions smoke tests; produce third-party NOTICE/license register. Fail gate if no reproducible installation or source/ledger trust.
+## Gate 1 - Customer evidence and workflow map (week 1-3 in parallel)
+Interview 20 firms; document one real sample each for BOQ, material receipt, labour muster, invoice, RA bill and subcontract certificate. Select only 3-4 highest frequency flows for first UI refinements. Fail gate if nobody will own daily site entry.
+## Gate 2 - First pilot flow (weeks 3-7, estimate)
+Role scoped onboarding, project + approved BOQ, site entry, material movement and accountant reconciliation. Demo using synthetic or customer-authorized test data; record usability issues. Do not accept a polished dashboard without reconciled source records.
+## Gate 3 - Commercial pilot (weeks 8-12+, estimate)
+Add measured subcontract billing, owner drilldowns and PWA draft mode; deploy isolated customer sites; monitor error budgets and usage. Obtain paid contract and data-processing terms. Timing depends on upstream stability and integration issues.
+## Gate 4 - Broaden only after positive adoption
+Add client RA billing, advanced scheduling and estimator integrations in the order requested by paying accounts. Android native and BIM stay conditional.
+# 12. Risks, trade-offs and decisions
+Risk	Impact	Mitigation / owner
+BuildSuite beta instability	High	Pin SHA, regression suite, upstream issue audit; tech lead
+Frappe v16 vs Cepho v15 incompatibility	High	Reference only; manually port small verified module, never blind installation
+OpenConstructionERP AGPL obligations	High	Counsel-led code/license boundary and commercial license decision before code reuse
+Low site-user data entry adoption	High	Daily 2-minute flows, offline drafts, local champion, usage tracking
+Duplicate accounting documents	Critical	Source-target uniqueness, atomic submit, immutable ledger ownership, replay tests
+Multi-tenant data leakage	Critical	Site isolation, project RBAC, negative authorization test matrix
+Scope creep	High	Module gate / launch scorecard; no unapproved phase changes
+Pricing below support cost	High	Measure fully-loaded onboarding and support cost before rollout
+
+# 13. Open decisions and launch authority
+Product owner must approve first contractor segment and paid pricing. Engineering lead approves pinned dependency versions and threat model. Accountant signs off financial process and GST/TDS treatment. Legal reviews licenses and customer data terms. Pilot customer signs off real workflow mapping. No external feature or source project becomes production critical without documented feasibility results.
+# 14. Research and source register
+ERPNext version support: https://github.com/frappe/erpnext/wiki/Supported-Versions
+BuildSuite Core beta, v16, MIT and features: https://github.com/BuildSuite-io/buildsuite_core
+BuildSuite dashboard caveat report: https://github.com/BuildSuite-io/buildsuite_core/blob/develop/DASHBOARD_GAPS.md
+Cepho Suite v15 and MIT: https://github.com/cepho/construction_management_suite
+OpenConstructionERP AGPL and technical architecture: https://github.com/datadrivenconstruction/OpenConstructionERP
+OpenProject GPLv3 and scheduling: https://github.com/opf/openproject
+Frappe users and roles: https://docs.frappe.io/framework/user/en/basics/users-and-permissions
+# 15. Definition of done
+A release is complete only when a clean install and migration succeed; the role/tenant negative tests pass; the six golden financial/operational paths pass; accountant signs off ledger reconciliation; UI has real data and clear empty/loading/error states; backup restore is rehearsed; license and dependency register is approved; and a paid pilot can finish its first week without spreadsheet re-entry of those paths. Anything less is a prototype, not a production-ready construction ERP.

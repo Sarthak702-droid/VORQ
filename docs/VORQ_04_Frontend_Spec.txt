@@ -1,0 +1,205 @@
+VORQ | Frontend Engineering and Reuse Specification
+Implementation handbook v1.0 | 03 November 2026 | Reuse-first delivery
+# 1. Frontend engineering decision
+Primary customer-facing UI = existing BuildSuite Core frontend (Vue + Vite; verify exact packages in pinned revision), branded and extended with a single VORQ shell. Frappe Desk remains an intentional specialist workspace for accounting, tax administration and setup. New mobile site PWA flows should reuse components, composables and REST data contracts from BuildSuite where feasible. Do not create an entirely new Next.js frontend just because the team has Next.js experience.
+OpenConstructionERP uses React + TypeScript + Vite and is a potential future specialized tool surface, not an excuse to move all v1 modules into React. OpenProject uses its own UI stack and should be API-integrated only after product need is proven. In production, each authorized user sees one coherent product, not five login screens.
+# 2. Mandatory discovery before coding
+Audit the pinned upstream repositories and produce a one-page inventory with: route, user task, visual component, API method, DocType owner, role check, data status (live/mock), tests, license, current defect and decision (reuse/wrap/replace/remove). Verify the BuildSuite dashboard-gap file against current branch; its notes refer to earlier dead prototype role landings, which cannot be treated as trustworthy production functionality without reinspection.
+Inspection target	Output artifact
+BuildSuite existing routes/views	route-inventory.csv with live/dead/mock and permission status
+BuildSuite components/styles	component-reuse-map.csv with CSS tokens, variant inventory
+Frappe Desk screens	list of expert finance screens reused unchanged
+ERPNext/BuildSuite API	OpenAPI-like manually maintained contract with examples
+Cepho	IPC and retention rules, version-gap checklist (v15 vs v16)
+OpenConstructionERP frontend	optional BOQ/takeoff component list and licensing checklist
+OpenProject	API v3 feasibility spike for required project/task actions
+
+No production implementation starts from speculative component names. Use the actual checked-out repository directory paths discovered by source inspection.
+# 3. Proposed repository layout (logical)
+
+vorq-workspace/
+  infra/                   # version locks, provisioning, compose, backups
+  frappe-bench/
+    apps/frappe/            # pinned upstream
+    apps/erpnext/           # pinned upstream
+    apps/buildsuite_core/   # pinned upstream or controlled vendor branch
+    apps/vorq_core/         # custom policies, role-home APIs, adapters
+    apps/india_compliance/  # optional, compatible version after audit
+  ui-overrides/             # documented theme tokens + minimal extensions
+  e2e/                      # Playwright journeys and authorization negatives
+  docs/                     # ADRs, mappings, licenses, runbooks
+  optional-services/
+    openproject-adapter/    # later; separate deployed service
+    construction-takeoff/  # later; AGPL/commercial license gate
+This is an organizational proposal, not an assertion that upstream projects use these folder names. Prefer extending upstream via supported hooks, route registrations and adapters instead of editing core files directly.
+# 4. Navigation architecture and route contract
+## 4.1 Unified shell
+Top bar: VORQ wordmark, tenant/company name, project selector, alert count, help, profile and network state. Sidebar: Home, My Projects, Site, Materials, Labour, Procurement, Subcontracts, BOQ, Finance, Reports and Settings. Render only granted modules; show task shortcuts based on assigned role, not only a role-specific color scheme.
+## 4.2 Route inventory
+Route (proposed public path)	Primary role	Page / source	P0/P1
+/home	Owner/any	BuildSuite existing home, role-scoped	P0
+/projects	PM/Owner	BuildSuite project list	P0
+/projects/:id	PM/Owner/site	BuildSuite project dashboard	P0
+/projects/:id/boq	QS/PM	BuildSuite BOQ editor	P0
+/projects/:id/schedule	PM	BuildSuite Gantt	P0
+/site/today	Site Engineer	Mobile task-first page, reuse field components	P0
+/site/reports/:id	Site Engineer/PM	BuildSuite daily progress record	P0
+/materials/requests	Storekeeper/PM	BuildSuite material request	P0
+/materials/movements	Storekeeper/Accountant	BuildSuite + ERPNext stock entry	P0
+/labour/muster	Site Engineer	BuildSuite workforce flows	P0
+/subcontracts	QS/PM	BuildSuite subcontract	P0
+/finance/overview	Accountant/Owner	Source-backed aggregate + ERPNext links	P0
+/finance/invoices	Accountant	ERPNext Desk deep link or reused list	P0
+/approvals	Owner/PM	Consolidated approval inbox	P0
+/billing/ra	QS/Billing Officer	Cepho-inspired v16 port, if proven	P1
+/advanced/takeoff	QS	OpenConstructionERP licensed/isolated	P2
+
+Actual paths may differ; this is the target information architecture. At implementation time map URLs to existing routes to minimize breaking changes. Route guards improve UX; server checks still control access.
+# 5. Design-system implementation and styling bridge
+Use shared CSS custom properties, applied to BuildSuite shell and VORQ custom components. Keep upstream component CSS functional. Normalize typography, spacing, navigation, status colors and button hierarchy. Avoid wholesale DOM/CSS overrides that depend on unstable internal class names.
+
+:root {
+  --vorq-ink: #111827;
+  --vorq-canvas: #f8fafc;
+  --vorq-surface: #ffffff;
+  --vorq-border: #e2e8f0;
+  --vorq-primary: #2563eb;
+  --vorq-danger: #b91c1c;
+  --vorq-radius: 10px;
+  --vorq-space-1: 4px;
+  --vorq-space-2: 8px;
+  --vorq-space-4: 16px;
+}
+Create reuse inventory for: shell, page header, breadcrumbs, project switcher, metric card, data table, filter bar, status chip, file upload, confirmation dialog, form field, document timeline, sync indicator, activity log and empty state. Only create a new component when there is no appropriate reusable counterpart.
+# 6. Permission-aware navigation pattern
+
+// Illustrative contract, not a copy of BuildSuite source code
+interface SessionContext {
+  companyId: string;
+  userId: string;
+  assignedProjectIds: string[];
+  capabilities: string[];  // populated by server
+}
+
+const menuItems = [
+  { key: 'home', path: '/home', permission: 'home.read' },
+  { key: 'boq', path: '/projects/:id/boq', permission: 'boq.read' },
+  { key: 'finance', path: '/finance/overview', permission: 'finance.read' },
+];
+
+function visibleMenu(session: SessionContext) {
+  return menuItems.filter(item => session.capabilities.includes(item.permission));
+}
+// This controls presentation only. Back-end APIs must verify permission and project 
+scope.
+Capabilities should be derived by authenticated backend from Frappe roles + project memberships + feature plan + approval threshold. Never trust user-editable localStorage for a permission decision. Deep links must 403 cleanly if access is absent, not crash or leak data.
+# 7. Frontend data service standards
+Use one API client abstraction per business module with typed request/response shapes. Prefer official upstream Frappe REST/RPC and existing BuildSuite API client conventions.
+An API result is not assumed to be valid; validate critical response fields, doc status, currency and per-project scope.
+Use server-generated summaries for expensive financial aggregation; do not fetch thousands of GL entries to compute totals in the browser.
+Separate authoritative remote state from ephemeral local form state. Normalize errors into permission denied, validation error, conflict, network error, server error and unavailable feature.
+Use request IDs on mutations, disable duplicate submit while in flight, preserve retry semantics and render confirmed ERP doc reference after success.
+Never optimistically set invoice as paid, PO as approved or stock quantity as consumed until source record is confirmed by backend.
+Date/time: store ISO 8601 timestamps with timezone; render Asia/Kolkata in UI as appropriate; do not use unqualified local-date strings for cross-service ordering.
+Monetary calculation: use integer minor units or precise decimals in computation; avoid floating-point summation for booked totals. UI rounds only for display.
+# 8. Screen-specific frontend requirements
+## 8.1 Portfolio and project dashboards
+Define KPI types with sourceDocTypes, asOf, taxBasis, status and drilldownURL. A null KPI renders 'Not available', not 0. Skeleton loading maintains fixed card height. Source-backed cost categories must reconcile to Frappe server. Owner can filter by current projects but cannot view other companies' data.
+## 8.2 BOQ editor
+Use existing BuildSuite grid/tree first; build a column adapter for code/description/UOM/quantity/rate/amount. Validate uploaded CSV/XLSX preview row by row and surface duplicate codes, invalid UOMs and impossible values. Maintain dirty-state warning, revision compare and approval lock. Advanced OpenConstructionERP AG Grid is gated by legal and feasibility review; copy neither the whole app nor its AGPL frontend without approval.
+## 8.3 Materials
+Provide idempotent POST for material issue and source link; show lifecycle tabs and transaction detail. An edited draft may be saved locally; approved receipt/issue remains server-authoritative. For site use, provide oversized controls and barcode/manual item selection only if customers validate need. Avoid generalized warehouse management rewrite.
+## 8.4 Labour and field reports
+Prioritize select-crew, mark exceptions, enter shift, attach photo and save. Group submissions per project/site/date with deterministic draft key. Show server rejection with field path, not generic toast. If user changes project while draft exists, prompt save/discard without losing data.
+## 8.5 Finance
+Read-only summary can use custom VORQ dashboard; detailed invoices and reconciliation go to Frappe Desk deep links. Preserve common customer header and back navigation. Display GST/withholding only based on approved accounting configuration; no client-side guessed tax.
+## 8.6 Approval workflow
+Review details and linked evidence before action. UI enforces eligibility for convenience; server enforces threshold, role and maker-checker rule. An approval action returns final doc status and version. Conflicts show updated record and re-open rather than overwriting server state.
+# 9. Offline PWA implementation specification
+## 9.1 PWA constraints
+A PWA is not identical to a native Android app. Do not promise indefinite offline operation, large background uploads when closed, or guaranteed sync under battery restrictions. Do not cache payment details, journal records or broad customer lists on device.
+## 9.2 Offline draft lifecycle
+Online authenticated user opens assigned site and downloads permitted minimal reference data.
+User fills daily report and photo attachments; locally save draft in IndexedDB with project/date/user/revision and retention expiry.
+When offline, show amber 'Saved on device; not submitted' and pending queue count.
+On reconnect, check session validity and project membership; upload attachments in bounded chunks/retries where supported.
+POST report with clientDraftId and idempotency key. Backend returns canonical server doc ID and confirmed status.
+Mark local item synced only after confirmed response; clear private payload based on retention policy. Conflict shows explicit merge/review screen.
+## 9.3 Safe queue object
+
+interface OfflineSiteDraft {
+  localId: string;
+  tenantSite: string;
+  projectId: string;
+  siteDate: string;
+  formVersion: number;
+  status: 'draft' | 'pending' | 'conflict' | 'failed' | 'synced';
+  lastEditedAt: string;
+  idempotencyKey: string;
+  payloadRef: string; // IndexedDB pointer, not URL containing secrets
+}
+Test airplane mode, browser kill, duplicate reconnect, session expiry, role revoked while offline, storage cleared, upload interruption and conflicting amended report. Offline records must not silently move to submitted or approved.
+# 10. Specialized engine integration UI
+## 10.1 OpenProject
+Before integrating, prove OpenProject API v3 supports the exact work package, dependency, schedule and user operations needed. If not, keep BuildSuite scheduler. If enabled, maintain canonical project/task mapping and show remote update/failure state. Never present parallel editable task stores without authoritative owner.
+## 10.2 OpenConstructionERP
+Implement only after license review and proof-of-value. OpenConstructionERP's React frontend can be deployed as a separate tool with SSO and mapped VORQ theme tokens, or selected components may be legally reused under compliant terms. React components cannot simply be imported into Vue like local single-file components; choose a routed microfrontend/wrapper with strict postMessage or API contracts if necessary. Avoid raw cross-origin iframe without session, CSP, accessibility, and security review.
+## 10.3 Cepho
+Do not mount Cepho v15 screens into a v16 installation. Use its business workflow as a tested design reference for client progress billing and port the minimal needed interface into compatible BuildSuite/Vue views with consistent design.
+# 11. Frontend testing and delivery requirements
+Test class	Exact checks
+Component	Form labels, validation, numeric formatting, status, empty and loading states
+Routing	Correct navigation by role, valid/invalid project, direct URL permission deny
+API contract	Incorrect document state, missing fields, null KPIs, expired session, 409 conflict
+E2E	Owner creates project -> QS BOQ -> site daily report -> material -> accountant report
+Financial	No optimistic paid/posted state, no duplicated button submission, source drilldowns
+Offline	Lost network, re-login, duplicate queue, cache cleanup, attachment retry
+Responsive	360px mobile, 820px tablet, 1366px laptop, 1440px desktop
+Accessibility	Keyboard, focus, contrast, aria-live status, error announcement
+Performance	Measured route chunk sizes, p95 interaction response and first-load on midrange phone
+Regression	Upstream BuildSuite update snapshots and API contract compatibility
+
+# 12. Definition of done by frontend module
+A module is complete when it uses actual API data, respects project/tenant access, has coherent app-shell integration, supports keyboard/mobile interaction, shows accurate loading/error/empty/sync states, has tests for 403/409/5xx and duplicate mutation, records meaningful usage analytics without sensitive data, and passes sign-off from the business-role owner. Screenshots alone are not proof.
+# 13. Sprint-by-sprint frontend plan
+Sprint	Objective	Required demo
+S0 - Audit	Read pinned source, catalog screens and reusable components	Route/component inventory and screenshots
+S1 - Shell	Brand tokens, company/project context, role menu	Owner vs site engineer sees different safe navigation
+S2 - Core ops	Project, BOQ, materials, labour reused views	One project full operations path
+S3 - Financial trust	Ledger-backed KPIs, drilldowns, approvals	Accountant reconciles project spend
+S4 - Mobile PWA	Field daily report draft, camera, sync state	On-site network-loss demonstration
+S5 - Pilot hardening	Accessibility, performance, E2E, offline conflicts	Full regression + controlled customer UAT
+S6+ - Conditional	Client RA, specialized Gantt/takeoff after gates	Paid-customer-triggered feature validation
+
+Sprint order is an engineering planning sequence, not a guaranteed calendar. Scope can be reduced if source audit shows more complexity than expected; do not bypass testing to meet a date.
+# 14. Explicit DON'T list
+Do not rebuild all of ERPNext in React or Next.js.
+Do not pretend BuildSuite beta UI has no dormant/mock routes; audit actual source.
+Do not combine incompatible Vue, React and Angular components by copying files into one directory.
+Do not switch authentication providers without an explicit centralized identity migration plan.
+Do not let UI route filtering replace server permissions.
+Do not expose personal access tokens/API secrets in source, network logs or local storage.
+Do not persist posted accounting documents in offline queues.
+Do not implement finance totals with JavaScript float accumulation over pagination.
+Do not hide 403 or sync failures as empty success states.
+Do not introduce visual redesign churn before core contractor tasks pass usability testing.
+Do not use mock data in production or label unsupported forecasts as actual profits.
+# 15. Dependencies and engineering handoff checklist
+Exact upstream commit SHA and license register signed off.
+Working local Frappe + ERPNext + BuildSuite v16 environment, with seed data and role fixtures.
+Role/capability matrix signed off by product and backend.
+API contract and canonical project/BOQ/cost-code/ledger source mapping agreed.
+Routes and components tagged reuse/wrap/extend/deprecate.
+Design tokens and responsive behavior signed off; prototype required only for changed flows.
+Playwright end-to-end test artifacts, permission negatives and ledger reconciliation fixtures available.
+Build and deployment docs, rollback procedure, backup plan and incident runbook reviewed.
+# 16. Sources / implementation reference
+BuildSuite Core: https://github.com/BuildSuite-io/buildsuite_core
+BuildSuite dashboard caveats: https://github.com/BuildSuite-io/buildsuite_core/blob/develop/DASHBOARD_GAPS.md
+Frappe REST: https://docs.frappe.io/framework/user/en/api/rest
+Frappe auth/roles: https://docs.frappe.io/framework/user/en/basics/users-and-permissions
+OpenConstructionERP modular frontend: https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/MODULES.md
+OpenProject API v3: https://www.openproject.org/docs/api/
+Cepho Suite: https://github.com/cepho/construction_management_suite
+# 17. Final engineering acceptance gate
+A first-time contractor user can log in on desktop or mobile, see only their authorized company/project, enter a site day's activity, process material and labour through real source documents, inspect valid project financial status and recover gracefully from network/permission errors. No software-vendor seam, incorrect money status, duplicate accounting document, inaccessible mobile control or AGPL licensing blind spot may be waved away as a 'frontend polish task'.

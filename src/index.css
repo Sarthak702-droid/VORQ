@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --vorq-ink: #111827;
+  --vorq-slate: #475569;
+  --vorq-canvas: #f8fafc;
+  --vorq-surface: #ffffff;
+  --vorq-border: #e2e8f0;
+  --vorq-primary: #2563eb;
+  --vorq-primary-50: #eff6ff;
+  --vorq-success: #15803d;
+  --vorq-warning: #b45309;
+  --vorq-danger: #b91c1c;
+  --vorq-disabled: #94a3b8;
+  --vorq-radius: 10px;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--vorq-canvas);
+  color: var(--vorq-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular figures for financial numbers */
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Touch targets min 44px for field/mobile */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

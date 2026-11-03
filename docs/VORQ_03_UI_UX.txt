@@ -1,0 +1,145 @@
+VORQ | UI/UX Product Design Specification
+Design system + interface behavior v1.0 | 03 November 2026 | BuildSuite-first reusable UX
+# 1. Design mandate
+Create a cohesive, professional construction management product by reusing and selectively adapting the existing BuildSuite UI, ERPNext/Frappe Desk screens and, only after license and technical approval, specialized OpenConstructionERP views. The product must feel like one application even though some capabilities come from different projects. Users should not be exposed to upstream vendor names, inconsistent toolbars or unexplained jumps between applications.
+Design priority order: correctness and trust -> task completion -> mobile speed -> clarity -> polish. Do not prioritize glassmorphism, extensive gradients, card shadows or marketing animation over financial legibility. The result should feel like serious operational software, not a generic SaaS concept mockup.
+# 2. UX principles and non-negotiables
+Role first: display a focused home, relevant navigation and project access for each user, not a huge universal ERP menu.
+Evidence first: every money KPI should drill down to ledger or transaction sources, with basis and freshness visible.
+Progressive disclosure: common tasks in 1-3 steps; advanced setup, GST and journal activities remain in specialist ERPNext Desk.
+Context stays fixed: current company, current project, current date range and currency visible where they matter.
+Status must be explicit: draft, awaiting approval, approved, submitted, paid, overdue, offline pending and synchronization conflict.
+Safe by design: dangerous state changes require confirmation and reason; approvals are never disguised as autosave.
+Works on site: glove-friendly tap targets, legible sunlight contrast, minimal network reliance, visible save/sync state.
+Existing code wins: re-skin/compose components rather than rebuild functioning inputs, grids or accounting forms.
+# 3. Visual identity and design tokens
+Working brand: VORQ (no trademark/domain clearance implied). Use a typographic wordmark with an optional simple geometric monogram after brand review. Do not build an elaborate construction crane logo or use clip-art hardhats in primary navigation.
+Token	Value	Use
+Ink 900	#111827	Headlines, high-contrast navigation text
+Slate 600	#475569	Descriptions and supporting labels
+Canvas	#F8FAFC	Application background
+Surface	#FFFFFF	Content panels and forms
+Border	#E2E8F0	Subtle table / field separators
+Primary 600	#2563EB	Primary action, focus, active navigation
+Primary 50	#EFF6FF	Selected row, light selected state
+Success	#15803D	Confirmed, reconciled, paid
+Warning	#B45309	Pending, at-risk, approaching deadline
+Danger	#B91C1C	Error, failed, overdue, destructive action
+Neutral disabled	#94A3B8	Disabled with explanatory reason
+
+Typography: Inter or system sans-serif. Recommended scales: page title 24-28px, section title 18-20px, body 14-16px, table 13-14px, supporting label 12-13px. Use tabular numbers for costs, quantities and dates; always show INR symbol/label and consistent decimal rules. For financial reports, right-align numeric columns and include units in headers.
+Spacing: base 4px grid; desktop page horizontal padding 24-32px, card inset 16-24px, mobile inset 16px. Radius 8-12px for inputs and panels. Keep elevation light and meaningful. Thin dividers, not excessive borders. Table density is adjustable (comfortable/compact) but never unreadably small.
+Accessibility: keyboard navigation, semantic form labels, focus rings, error summary, screen-reader-friendly status text, minimum practical hit area around 44px on touch actions, contrast verified against WCAG 2.2 AA as an implementation test. Color alone never encodes project risk or approval state.
+# 4. One app shell and navigation hierarchy
+## 4.1 Desktop (>=1024px)
+Persistent left sidebar (220-256px), top context bar, content area and optional contextual detail panel. Sidebar groups: Home, Projects, Site Operations, Materials, Labour, Procurement, Subcontracts, Finance, Reports, Administration. Only show groups granted to this user. Current company and active project are explicit; global project switcher is searchable and respects scope.
+## 4.2 Tablet (768-1023px)
+Collapsible sidebar; main tables can scroll within their region while key filters remain accessible. Avoid cramped side-by-side forms. Primary actions remain visible; sticky summary bar for long BOQ and cost tables.
+## 4.3 Mobile (<768px)
+Top bar with project picker, single-column content and task-first bottom navigation limited to Home, Today, Projects, More. Site workflows should be optimized; do not squeeze full desktop ledger tables onto phones. Use responsive cards, accordions and full-screen forms. Accountant-only specialist forms can state that desktop is recommended while permitting relevant read-only views.
+## 4.4 External specialized module
+If advanced takeoff/scheduling is enabled, route it from same navigation under the same brand and project context, using SSO and standardized header/breadcrumbs. Show users a clear loading/error/return path. Do not mix multiple unrelated menu systems inside the same viewport.
+# 5. Role-specific information architecture
+Role	Default home	Top 3 actions	Hidden / restricted
+Owner	Portfolio overview	Review risk, approve, collections	Raw journal editing
+Project Manager	Assigned project status	Update plan, review exceptions, assign	Cross-company finance
+QS / Estimator	BOQ workspace	Import BOQ, revise, request approval	Payment posting
+Site Engineer	Today's site	Daily report, materials, labour	Portfolio and GL
+Storekeeper	Site inventory	Receive, issue, transfer	Tax and client billing
+Procurement	Purchase desk	Review request, PO, supplier follow-up	Bank entry
+Accountant	Finance desk	Invoice, reconcile, collect	Site edits without rights
+Subcontractor	My contracts	My tasks, submit measurement, view status	Other vendors and overall P&L
+
+Role-specific UI is a filtered view of shared data, not separate products or separate copies of code. Multiple roles combine capability grants while maintaining project scope.
+# 6. Priority screen design inventory
+## 6.1 Owner portfolio dashboard
+Top: company selector, reporting period, sync freshness and global alerts. First row: active projects, approved budget, committed cost, posted actual cost, receivables, payable exposure. Second row: projects at risk by variance, spend trend, collection aging, approvals requiring action. Third row: project table with risk chips, project manager, expected completion, last site activity. All cost cards link to transaction drilldowns. Show 'Forecast unavailable' when incomplete source data prevents trustworthy projection.
+## 6.2 Project overview
+Header: project title, status, site location, budget and assigned team. Tabs: Overview, Tasks, BOQ, Materials, Labour, Subcontracts, Billing, Documents, Activity. Overview shows stage progress, schedule variance, cost codes exceeding budget, pending approvals, daily report recency. Timeline and tasks reuse BuildSuite's existing scheduling capability before any OpenProject integration.
+## 6.3 BOQ editor / estimation
+Reuse BuildSuite BOQ tree, bulk editing and rate master. Key columns: code, item description, UOM, quantity, material unit cost, labour unit cost, rate, calculated amount and revision. Sticky totals, expandable groups, keyboard shortcuts, paste from spreadsheet, import preview (with errors) and explicit Draft -> Review -> Approved status. Complex advanced spreadsheet UI from OpenConstructionERP is a P2 legal-gated candidate, not an initial full frontend replacement.
+## 6.4 Site daily report on mobile
+Single screen: selected project/date, attendance summary, tasks progressed, delivered/used material, blockers, photos, notes. Autosave local draft with visible time; large Save Draft and Submit buttons. Required input errors appear inline. Offline state remains 'Saved on device - not submitted' until server confirms. After submit, display reference ID and read-only confirmation.
+## 6.5 Materials and purchase flow
+Tabs: Requests, Purchase Orders, Receipts, Stock Movements, Issues. Visually distinguish ordered, received, in stock, issued, consumed and returned. Use unit labels every time; avoid misleading totals where inventory units differ. Detail drawer shows audit history, related PO/receipt and who approved it.
+## 6.6 Labour muster / attendance
+Fast crew entry from saved crew, day and shift defaults, on-screen totals and exception review. No employee-type complexity for site workers unless required. Lock submitted daily muster; amendments must show old/new value and approver.
+## 6.7 Subcontractor measurement and bills
+Use a schedule-of-values table and cumulative progress meter with prior certified quantities. Side panel shows payable waterfall: measured gross -> retention -> advance settlement -> approved adjustment -> payable. Confirm legal/accounting details before presenting as invoice-ready. Payment status comes from linked ERPNext payable.
+## 6.8 Accountant finance workspace
+Show pending purchase invoices, issued client invoices, payment entries, receivables aging, project spending and reconciliation alerts. Use Frappe Desk for advanced tax, bank and journal screens rather than recreating them. When navigating to Desk, retain company/project context where supported and provide a route back to VORQ.
+## 6.9 Approval center
+Unified inbox by type, amount, project, requester, age and urgency. Each row has View Evidence, Approve or Reject with reason; approvals respect server thresholds. Show impact on BOQ, PO and budget before confirmation. No bulk approve for high-value financial events in MVP.
+## 6.10 Scheduling / Gantt
+Reuse BuildSuite Gantt and dependency behavior first. Show baseline/current task dates, dependencies, lateness and critical warnings. OpenProject integration stays optional if pilot proves need for richer planning.
+# 7. Reuse vs redesign mapping
+Surface	Reuse directly where possible	Change minimally	Never duplicate
+BuildSuite customer shell	Sidebar, routes, cards, project views	Branding, density, project context	Separate global menu framework
+BuildSuite BOQ / site / labour	Forms, interactions, data hooks	Copy, validations, mobile flow	New parallel BOQ source
+BuildSuite dashboards	Working aggregate data endpoints	Trust labels, drilldowns and states	Hardcoded mock KPI values
+Frappe Desk	Standard ERP list/form/report views	Role scope, entry links and subtle style	Full accounting UI rewrite
+Cepho	Business rules / workflow reference	Port selected approved RA patterns to v16	v15 app installed alongside v16 without test
+OpenProject	Specialized task/Gantt experiences	SSO and nav wrapper	New planning source without ownership map
+OpenConstructionERP	Specialized BOQ/takeoff UI after legal gate	Token mapping, route integration	Unlicensed source copy or second ledger
+
+A documented BuildSuite dashboard gap report notes unreachable prototype role landings and previous mock-backed areas; confirm against pinned revision and remove/disable dormant prototype screens rather than showing fictional metrics.
+# 8. Interaction standards and content rules
+Forms use clear labels and examples, not placeholder-only instructions. Errors say what failed, why and how to correct it.
+Empty states identify the reason and next action: 'No site reports submitted for this date' rather than 'Nothing here'.
+Loading states use stable skeletons for dashboards and row-level progress indicators for mutation; prevent duplicate submits.
+Use optimistic UI only for reversible non-financial actions; finance, stock and approvals wait for server-authoritative confirmation.
+Destructive/cancel actions ask reason, show linked effects and require permissions. Provide audit and amend, not silent overwrite.
+Search must honor active project scope and role permissions. Default sort latest relevant, with visible filters.
+Notifications are grouped by actionable approval, exception and information; avoid noisy generic 'AI suggestions'.
+Money includes currency, tax basis where relevant, integer minor units in data and human-readable formatting in UI. Project progress needs measurement definition (schedule/time/physical quantity).
+Use explicit states: Draft, Pending, Approved, Submitted, Partially Paid, Paid, Cancelled, Sync Pending, Conflict, Failed, Data Incomplete.
+# 9. Mobile PWA specification
+Installability is useful but not a promise of native parity. Implement manifest, icons, secure service-worker caching of static assets and controlled draft storage. A mobile user can open assigned project, log attendance, material and photos, save local draft and resume later. They cannot submit/approve accounting documents offline. Device storage and site privacy require short retention, user-controlled sign-out purge and privacy notice.
+Connectivity feedback: persistent unobtrusive network badge, draft count, last successful sync, retry button, conflict resolution screen, upload progress for each attachment. Do not show a green success check until remote server confirms. When multiple edits conflict, display versions rather than overwriting submitted records.
+# 10. Screen-by-screen definition of done
+Screen	Done when
+Owner portfolio	Values reconcile; all cards have correct source drilldown and freshness
+Project overview	All tabs are role scoped; no dead links; costs consistent with finance
+BOQ editor	Import validates units/duplicates; baseline revision immutable after approval
+Daily report PWA	Can save/reopen offline draft; recover from connection loss; safe submission
+Materials	Distinct receipt/issue/consumption; quantities and valuation never conflated
+Labour	Crew bulk entry, duplicate-date protection, clear correction workflow
+Subcontract bills	Cumulative measurement and payable calculation auditable
+Finance	Read source status from ERPNext; no uncontrolled financial duplication
+Approval inbox	Permission enforced server-side; actor/reason/timestamp captured
+
+# 11. Responsive and accessibility QA matrix
+Target	Check
+Desktop 1440x900	Consistent shell, 4-6 meaningful KPI columns, visible critical actions
+Laptop 1366x768	No clipped table controls, reasonable vertical scan, sticky context
+Tablet 820x1180	Sidebar collapse, usable BOQ and task detail, no nested traps
+Android 360x800	44px touch area, 1-column form, keyboard safe, offline status visible
+Keyboard-only	All controls reachable, logical tab order, visible focus and modal trap
+Screen reader	Table headers, form labels, error announcements, status role text
+High zoom (200%)	No hidden required data or horizontally lost submit buttons
+Slow network	No false success, stable loading and retry with retained draft
+
+# 12. Design process and sign-off deliverables
+Audit existing BuildSuite UI route map, component library, screenshot inventory and upstream design tokens. Capture provenance of components to be reused.
+Build one master journey board covering owner, site engineer, QS and accountant, annotated with source of truth and permission changes.
+Produce clickable prototype only for changed journeys: role home, BOQ review, site PWA, financial drilldown and approval drawer. Do not redraw every unchanged ERPNext form.
+Validate with 5 real contractor users using their work samples. Track task success, task duration, wrong-action count and comprehension of cash/stock terms.
+Prepare a component mapping/implementation packet for frontend engineers: route, source component, altered style token, API endpoint, interaction, loading/error/empty/offline states and acceptance test.
+# 13. Explicit UI anti-patterns / DO NOT
+No random mixing of five vendors' navigation bars, color systems or form patterns.
+No neon gradients, frosted-glass financial tables, massive cards or decorative 3D construction icons.
+No new React redesign of unchanged BuildSuite/Frappe forms purely for aesthetic preference.
+No graphs without units, time window, data source and clear definition.
+No visually hidden pending sync, edit conflict or failed invoice posting.
+No role-based menus that imply authorization without backend enforcement.
+No mobile desktop-table shrink-to-fit where critical actions become unusable.
+No UI performance claims without real mid-range Android and contractor laptop testing.
+# 14. Source / reuse references
+BuildSuite Core: https://github.com/BuildSuite-io/buildsuite_core
+BuildSuite dashboard notes: https://github.com/BuildSuite-io/buildsuite_core/blob/develop/DASHBOARD_GAPS.md
+Frappe Desk UI: https://docs.frappe.io/framework/user/en/basics
+OpenConstructionERP: https://github.com/datadrivenconstruction/OpenConstructionERP
+OpenProject: https://github.com/opf/openproject
+Frappe permissions: https://docs.frappe.io/framework/user/en/basics/users-and-permissions
+# 15. UX acceptance gate
+A contractor sees a clear, branded and role-appropriate application, performs a complete daily workflow on mobile, can understand the status of submitted documents, and can explain where every prominent financial KPI comes from. A new customer does not need to know which of the five upstream repositories powered a feature. Any unexplained interface switch, inaccessible field control, fictional KPI or silent offline failure blocks release.

@@ -1,0 +1,194 @@
+VORQ | Technology Stack and System Architecture
+Engineering specification v1.0 | 03 November 2026 | Implementation planning reference
+# 1. Architecture decision in one page
+VORQ shall reuse a functioning ERP rather than reproduce ERP internals. The primary runtime is Frappe Framework v16 + ERPNext v16 + BuildSuite Core compatible pinned revision, plus a small VORQ integration/customization app. The production database of record for construction transactional and accounting data is MariaDB within each Frappe customer site. Redis and background workers support queues/caching. BuildSuite's existing frontend and Frappe Desk are first-class reusable interfaces. A separate Next.js backend or Convex database is NOT required for the initial release.
+Important boundary: one product does not require every vendor's code in one process or every service in one database. OpenProject and OpenConstructionERP should remain isolated optional engines behind contracts. Cepho is an idea/reference source first, not a production-installable sibling of BuildSuite on the same v16 site unless code porting is proven.
+# 2. Repository decisions, licenses, compatibility and confidence
+Upstream	Published baseline	Role	VORQ decision
+Frappe Framework	Python, DocTypes, roles, APIs, MariaDB default	Web/backend framework	Required, pin compatible v16 release
+ERPNext	ERP accounting, purchasing, inventory, projects; GPL-3.0	Financial system of record	Required; never fork ledger logic
+BuildSuite Core	Frappe/ERPNext v16; MIT; beta	Site/BOQ/subcontract/progress workflows + frontend	Required after sandbox audit; pin commit
+Cepho Construction Suite	Frappe/ERPNext v15; MIT	IPC/RA, retention, subcontract references	Reference / selectively port to v16 only
+OpenProject	Ruby + Angular stack, PostgreSQL, GPL-3.0	Advanced task/Gantt planning	Conditional standalone integration via API v3
+OpenConstructionERP	Python/FastAPI + React/TS/Vite + PostgreSQL; AGPL-3.0	Advanced BOQ/CAD/BIM/PDF takeoff	Future optional service/UI reuse after legal gate
+India Compliance	ERPNext GST integration; GPL-3.0; some API access paid	Indian compliance helper	Evaluate for matching v16 release and tax requirements
+
+License and support posture must be reverified at the exact SHA/tag before fork or distribution. A permissive MIT extension does not erase GPL obligations inherited from the ERP platform. OpenConstructionERP states a commercial-license path for closed-source deployments. AGPL network-source obligations may apply to modified hosted copies; legal counsel must determine the boundary. This document is not legal advice.
+# 3. Runtime component topology
+
+Contractor mobile browser / installable PWA
+Owner, accountant and QS desktop browser
+                 |
+       HTTPS reverse proxy / WAF
+                 |
+      Customer's Frappe site hostname
+                 |
+     Frappe sessions + policy checks
+                 |
+   BuildSuite Vue UI / Frappe Desk / VORQ shell
+                 |
+       Frappe REST/RPC / domain services
+                 |
+ ERPNext | BuildSuite | VORQ custom DocTypes
+                 |
+   MariaDB per tenant site + Redis workers
+                 |
+ Object storage (private attachments) + backups
+                 |
+ OPTIONAL adapters only when enabled:
+ OpenProject API v3 | OpenConstructionERP REST
+ (isolated DB and service, not direct SQL joins)
+The diagram is logical, not a validated deployment diagram. Exact containers, proxy config and supported Frappe/BuildSuite versions must be proven in the reference environment.
+# 4. Technology stack selection
+Layer	Default / implementation	Reason or qualification
+Customer desktop	BuildSuite existing Vue/Vite frontend plus Frappe Desk	Maximum frontend reuse; avoid wholesale UI rewrite
+New custom field surfaces	Existing BuildSuite/Vue conventions, modular components	One predominant customer UI and cheaper integration
+Site PWA	Reuse Vue app and route components; add service worker carefully	App-like mobile field capture without independent native app
+Backend framework	Frappe Framework v16 on Python	DocType schema, auth, workflows, jobs, REST/RPC
+Business ERP	ERPNext v16	Canonical ledger, purchasing, inventory, invoice status
+Construction layer	BuildSuite Core pinned v16-compatible SHA	BOQ, cost codes, labour, subcontract, site execution
+DB (core)	MariaDB, supported v16 version	ERPNext transactional store; site isolation
+Cache / queue	Redis + Frappe workers/scheduler	Async jobs and cache, with retries and observability
+Files	Private attachments + production object storage if supported	Photos, invoices, estimates and BOQ evidence
+Reporting	Frappe/ERPNext queries and server aggregators	Financial KPIs based on authoritative posted documents
+Testing	Python test runner, Vitest, Playwright, API contract/ledger tests	Cross-stack regression and role isolation
+Infrastructure	Version-pinned containers or reproducible bench deployment	Reproducibility, patches, backups and monitoring
+Future scheduling	OpenProject standalone API v3, only if BuildSuite insufficient	Avoid duplicate work package engines
+Future takeoff	OpenConstructionERP separately deployed FastAPI/React + PostgreSQL	Specialist functions; AGPL/commercial licensing gate
+
+Avoid choosing exact minor versions from memory. Record every package release, Docker image digest, OS package and migration path in dependency lock manifest at Gate 0.
+# 5. Source-of-truth and entity ownership
+Entity / action	Canonical owner	Other module behavior
+GL entry, tax, Payment Entry, Purchase/Sales Invoice	ERPNext	Read/link; never mutate ledger by direct SQL
+Project and company record	ERPNext/Frappe	BuildSuite extends, not duplicates
+Project cost code and approved BOQ baseline	BuildSuite / VORQ canonical schema	Other tools import snapshots using mapping IDs
+Purchase receipt, stock and material transactions	ERPNext stock documents	BuildSuite captures intent / validates source link
+Daily site report, muster, task progress	BuildSuite	Financial impact through approved generated ERP documents
+Subcontract work order, measurement	BuildSuite	Approved bill generates one ERPNext payable
+Client RA/IPC certificate	VORQ future extension	Approved cert creates one ERPNext Sales Invoice
+Advanced Gantt task	BuildSuite initially	Future OpenProject mirror with explicit mapping
+CAD/BIM extraction / takeoff working file	OpenConstructionERP if licensed	Publish reviewed BOQ snapshot to canonical cost codes
+
+No dual-write of ledger records from two separate apps. When a source generates a target document, use source ID + target ID + unique constraint + transaction boundary. Events can trigger asynchronous read-side refreshes, not competing ledger writes.
+# 6. Data model / key DocTypes
+Object	Important fields / invariants
+Company / Tenant	Site hostname, legal name, GSTIN (where needed), active status; site is isolation boundary
+Project	ID, company, client, contract value, state, dates, currency, manager, location
+Project Membership	User, project, roles, start/end, approval thresholds; enforced server-side
+Cost Code	ID, project/template, parent, category, BOQ linkage, active version
+BOQ Revision	Project, revision number, status, approved_at/by, baseline hash; immutable on submit
+BOQ Item	Cost code, UOM, quantity, rate, amount and scope; version reference
+Daily Site Report	Project, date, submitter, notes, photos, weather, sync/source ID
+Labour Muster	Crew, worker IDs, shift/hours, rates, project, task, submission status
+Material Movement	Item, site warehouse, qty, UOM, PO/receipt/issue link, cost code
+Subcontract Certificate	Agreement, cumulative measured work, retention, adjustments, linked ERPNext invoice
+Client RA Certificate (P1)	Contract, approved measurements, prior billed, holdback, approved payer, Sales Invoice link
+Integration Map	Adapter, remote ID, canonical ID, checksum, sync revision, last success/error
+Outbox Job	Event name, origin, idempotency key, payload ref, retry count, state
+
+Use exact upstream DocType names wherever available; do not invent replacement tables that collide with upstream. Schema inventory must be generated from checked-out sources at Gate 0 and mapped before migrations.
+# 7. Authorization and tenant safety
+Customer tenancy starts with one Frappe site and database per organization; do not share rows across customer sites in a custom global service.
+Authenticate with Frappe-managed secure sessions. Use server-side role and project checks on every endpoint. Use CSRF protection for authenticated browser writes; never expose API secrets to browser JavaScript.
+Support owner, PM, QS, Site Engineer, Storekeeper, Procurement, Accountant, external Subcontractor and operator roles. Permissions are additive only when explicit; sensitive financial operations need maker-checker approval.
+Project scoping applies to lists, record read, reports, attachments, search, exports, background jobs and websocket subscriptions.
+When adding OpenProject/OpenConstructionERP, establish SSO or trusted proxy authorization plus synchronized project scope; do not silently pass end-user ERPNext tokens to external services.
+Customer support must use time-bound, logged break-glass access approved by authorized tenant administrators.
+# 8. Integration contracts and failure semantics
+## 8.1 VORQ domain adapter interface
+
+CreateProject / GetProject / ListProjects
+ImportBOQDraft / ApproveBOQRevision
+CreateMaterialRequest / ReceiveGoods / PostMaterialIssue
+SubmitDailySiteReport / SubmitLabourMuster
+SubmitSubcontractMeasurement / ApproveSubcontractBill
+GetProjectCostSnapshot / GetReceivablesPayables
+CreateClientMilestoneInvoice / GetLinkedERPDocument
+Each request carries tenant context from authenticated host, user context, canonical project ID, request ID, idempotency key for writes and expected revision for edit conflicts. The server validates permissions and state transitions; input shape alone is not authorization.
+## 8.2 Example cost snapshot contract
+
+{
+  "project_id": "PRJ-001",
+  "as_of": "2026-11-03T16:00:00+05:30",
+  "currency": "INR",
+  "budget_ex_tax": 8000000,
+  "actual_posted_ex_tax": 4800000,
+  "open_commitments_ex_tax": 900000,
+  "forecast_to_complete_ex_tax": null,
+  "data_quality": "incomplete_forecast",
+  "source_documents": 214
+}
+A blank forecast is deliberately null rather than a fabricated number. Tax-inclusive vs tax-exclusive bases must never be mixed. Sources must return currency and timestamp; UI shows stale/incomplete indicators where appropriate.
+## 8.3 Async and external system behavior
+Use an outbox in the transactional owner system and bounded retries with jitter and dead-letter review. Adapter event processing must be idempotent and observable. Cross-service data is eventually consistent; do not show financial success before ERPNext confirms posted document. Provide reconciliation jobs comparing IDs, checksums and amounts, and an operator repair path.
+## 8.4 Offline PWA
+Store only minimum local draft site data, never long-lived secrets or full financial records. Use IndexedDB with versioned schema, draft IDs and an outbox; display pending/synced/conflict/failed state. On reconnect, revalidate role, project, attachment and duplicate key. Photo uploads support retries and compression; submit only after acknowledgments. No offline approval, GL posting, PO release or payment settlement.
+# 9. Source reuse and merging discipline
+## 9.1 Preferred approach
+Fork BuildSuite in a controlled vendor branch; pin upstream SHA; keep VORQ custom code in separately versioned Frappe app and limited frontend extension layer. Branding and navigation customization should be layered through shared tokens, not blanket upstream changes. Use ERPNext Desk for specialist accountants/admin instead of rebuilding every screen.
+## 9.2 Cepho porting workflow
+Extract specific IPC / retention workflow rules and tests as a reference; verify law and accounting semantics; implement equivalent v16-compatible DocTypes/hooks in VORQ custom app; regression test against BuildSuite and standard ERPNext documents. Do not merge arbitrary hooks, DB migrations or duplicate BOQ DocTypes.
+## 9.3 OpenProject integration gate
+Only if real clients need features missing from BuildSuite scheduling. Map canonical project/task and dependency IDs; OpenProject stays an optional service with its own DB; avoid simultaneous write authorities. API v3 is not complete for every UI operation, so spike the exact required endpoints first.
+## 9.4 OpenConstructionERP integration gate
+Review actual repository components and third-party attributions; decide commercial license vs AGPL-compatible distribution before copying/embedding frontend. Keep FastAPI/PostgreSQL service separate. Imported quantity data is unapproved until QS reviews units, geometry, classifications and rates. For frontend, a routed module with common header and SSO is preferable to a raw unauthenticated iframe; visual integration does not eliminate license or security obligations.
+# 10. Deployment and operations
+Environments: local reproducible development, synthetic-data staging, isolated production tenant sites. Never import real customer data into public demos.
+Provisioning: create site/database, configure domain/TLS, install pinned apps and fixtures, establish private storage, tenant admin and sample data where authorized.
+Backups: encrypted database + file backups, scheduled integrity checks, restore rehearsal to a fresh isolated site. Specify pilot RPO <=1 hour / RTO <=8 hours as proposed engineering goals only after proving infrastructure can meet them.
+Observability: request IDs, server errors, queue depth, sync backlog, backup health, ERP post failures, security denies and p95 page/API timing. Log IDs, not personal sensitive payloads.
+Releases: dependency lock update in sandbox, migration dry-run, accounting reconciliation fixture, canary tenant, rollback/restore plan, then rollout. Never upgrade ERPNext on all tenants blindly.
+Data export: tenant owner can request project, invoice, BOQ and attachment export in agreed open formats; document limits and any ERP-specific dependencies.
+# 11. Threat model and quality gates
+Threat / failure	Mandatory control / test
+Cross-tenant or cross-project leak	API negative tests for list, filter, export, attachment and direct IDs
+Duplicate invoice on retry	Unique source-target link, race simulation, replay and cancellation test
+Unauthorized approval	Backend permission checks + approval history, not frontend-only route guard
+Malicious file	MIME/extension check, size limit, malware scan, private attachment ACL
+CSRF / session fixation	Framework controls, HttpOnly/SameSite cookies, token rotation, security headers
+XSS in notes / file names	Escape content, forbid unsafe HTML rendering, CSP and automated tests
+Silent stale reporting	As-of time, data quality flag, source drilldown and alert
+Offline conflict	Revision handling, explicit conflict UI, never last-write-wins on approved records
+Migration loses GL consistency	Pre/post reconciliation totals, schema backups, rollback route
+
+# 12. CI/CD and test plan
+Static: Python lint/type checks as supported, Vue/TypeScript lint, dependency license/security scan, formatting.
+Unit: BOQ totals, retention/advance waterfall, cost mapping, UOM conversions, rate change, maker-checker policies.
+Integration: ERPNext PO -> receipt -> issue, bill -> ledger, invoice -> receivable, cancel/amend reversals, source event idempotency.
+Contract: Frappe API schemas and optional adapter payloads; versioned fixtures detect upstream changes.
+E2E: role login, project creation, approved BOQ, daily report, stock receipt/consumption, bill, owner dashboard drilldown; responsive and accessibility checks.
+Regression: version-pinned releases and migration snapshot, financial parity and negative project/tenant access tests before each customer upgrade.
+No module is accepted if it only passes UI tests while resulting accounting documents are incorrect. Staging smoke test alone is not production validation.
+# 13. Decision log
+ID	Decision	Revisit trigger
+ADR-01	ERPNext owns ledger and inventory	Never casually; requires CFO/architect review
+ADR-02	BuildSuite v16 is primary construction app/UI	Beta gap or poor customer usability demonstrated
+ADR-03	Cepho v15 used as reference until ported	Complete compatibility and accounting proof
+ADR-04	No new Next.js main UI in MVP	Proven inability to adapt reused UI
+ADR-05	One site/database per initial customer	Operating cost / customer count merits controlled redesign
+ADR-06	OpenProject conditional integration	Advanced schedule requirements from paid pilots
+ADR-07	OpenConstructionERP AGPL code behind legal gate	License approved and ROI from estimator users
+ADR-08	Mobile-first PWA before native	Offline/background/OS needs demonstrated in field
+
+# 14. Implementation sequence and detailed exit criteria
+Inventory exact DocTypes, routes, Vue component tree and test coverage in pinned BuildSuite revision; identify mock/dead role pages. Exit: code map and known gaps approved.
+Reproducibly install Frappe/ERPNext v16 + BuildSuite + compatible India Compliance; record migrations and baseline reconciliation. Exit: clean install twice.
+Define canonical IDs, role/project permissions, approved BOQ and project financial snapshot contract. Exit: negative permission tests and ledger fixture pass.
+Reuse and polish existing BuildSuite screens for project, BOQ, materials, subcontract and site. Exit: single shell, tokenized UI, no dual entry.
+Add PWA offline drafts for site reports; add warning, retry and conflict UI. Exit: field tests on intermittent mobile network.
+Pilot customer deployment with monitoring, backups and accountant certification. Exit: paid pilot with first completed business cycle.
+Implement advanced client IPC/RA and optional scheduling/takeoff only after demand, licensing and version gates.
+# 15. Sources / verification register
+https://github.com/frappe/erpnext
+https://github.com/frappe/erpnext/wiki/Supported-Versions
+https://docs.frappe.io/framework/user/en/basics
+https://docs.frappe.io/framework/user/en/basics/users-and-permissions
+https://docs.frappe.io/framework/user/en/api/rest
+https://docs.frappe.io/framework/user/en/bench/guides/setup-multitenancy
+https://github.com/BuildSuite-io/buildsuite_core
+https://github.com/cepho/construction_management_suite
+https://github.com/datadrivenconstruction/OpenConstructionERP
+https://www.openproject.org/docs/api/
+https://github.com/opf/openproject
+https://github.com/resilient-tech/india-compliance
+Sources are upstream self-descriptions and official documentation; feature claims require installed, tested proof before release. This architecture is a target design, not a completed repository integration.
