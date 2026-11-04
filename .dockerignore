@@ -1,0 +1,8 @@
+.git
+node_modules
+dist
+vendor/*/.git
+vendor/*/frontend
+**/__pycache__
+.test-output
+deployment/.env

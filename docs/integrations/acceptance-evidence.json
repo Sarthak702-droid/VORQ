@@ -1,0 +1,18 @@
+{
+  "company": "VORQ Development",
+  "project": "PROJ-0001",
+  "purchase_order": "PUR-ORD-2026-00001",
+  "purchase_receipt": "MAT-PRE-2026-00001",
+  "material_issue": "MAT-STE-2026-00001",
+  "purchase_invoice": "ACC-PINV-2026-00001",
+  "boq": "BOQ-00001",
+  "work_order": "SWO-2026-00001",
+  "measurement": "MB-2026-00001",
+  "ra_bill": "SB-2026-00001",
+  "ra_purchase_invoice": "ACC-PINV-2026-00002",
+  "retention": "40",
+  "stock_delta": "7",
+  "gl_balanced": true,
+  "idempotency_verified": true,
+  "nonmember_denied": true
+}

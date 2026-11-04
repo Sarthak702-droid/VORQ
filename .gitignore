@@ -3,3 +3,8 @@ dist
 .env
 .env.local
 *.log
+vendor/
+.test-output/
+deployment/.env
+__pycache__/
+*.pyc

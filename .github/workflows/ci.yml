@@ -1,0 +1,38 @@
+name: VORQ validation
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:auth
+      - run: python -m compileall -q apps/vorq
+      - run: python -m unittest discover -s tests -v
+  real-erp-story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: bash scripts/dev-up.sh
+      - run: docker compose --env-file deployment/.env -f deployment/compose.yaml wait create-site
+      - run: docker compose --env-file deployment/.env -f deployment/compose.yaml exec -T backend bench --site frontend execute vorq.smoke.run
+      - run: python scripts/verify-http.py
+      - run: python scripts/verify-signup.py
+      - name: Diagnostics
+        if: failure()
+        run: docker compose --env-file deployment/.env -f deployment/compose.yaml logs --no-color --tail 30
+      - name: Remove disposable CI environment
+        if: always()
+        run: docker compose --env-file deployment/.env -f deployment/compose.yaml down --volumes

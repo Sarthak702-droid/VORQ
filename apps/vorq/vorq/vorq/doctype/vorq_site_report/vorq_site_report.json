@@ -1,0 +1,95 @@
+{
+  "doctype": "DocType",
+  "name": "VORQ Site Report",
+  "module": "VORQ",
+  "autoname": "hash",
+  "track_changes": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "project",
+    "company",
+    "report_date",
+    "weather",
+    "progress_notes",
+    "blockers"
+  ],
+  "fields": [
+    {
+      "fieldname": "project",
+      "label": "Project",
+      "fieldtype": "Link",
+      "options": "Project",
+      "reqd": 1
+    },
+    {
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Link",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "report_date",
+      "label": "Report Date",
+      "fieldtype": "Date",
+      "reqd": 1
+    },
+    {
+      "fieldname": "weather",
+      "label": "Weather",
+      "fieldtype": "Select",
+      "options": "Clear\nCloudy\nRain\nExtreme heat",
+      "reqd": 1
+    },
+    {
+      "fieldname": "progress_notes",
+      "label": "Progress Notes",
+      "fieldtype": "Small Text",
+      "reqd": 1
+    },
+    {
+      "fieldname": "blockers",
+      "label": "Blockers",
+      "fieldtype": "Small Text",
+      "reqd": 0
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1
+    },
+    {
+      "role": "BuildSuite Site Engineer",
+      "read": 1,
+      "create": 1,
+      "write": 1,
+      "report": 1
+    },
+    {
+      "role": "BuildSuite PM",
+      "read": 1,
+      "create": 1,
+      "write": 1,
+      "report": 1
+    },
+    {
+      "role": "BuildSuite QS",
+      "read": 1,
+      "create": 1,
+      "write": 1,
+      "report": 1
+    },
+    {
+      "role": "BuildSuite Director",
+      "read": 1,
+      "create": 1,
+      "write": 1,
+      "report": 1
+    }
+  ]
+}

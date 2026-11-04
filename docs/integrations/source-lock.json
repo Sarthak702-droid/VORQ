@@ -1,0 +1,51 @@
+[
+  {
+    "name": "erpnext",
+    "sha": "35a71243ff341ae579930727da2f2c58f58ad117",
+    "files": 5919,
+    "test_files": 605,
+    "license": "license.txt"
+  },
+  {
+    "name": "frappe_docker",
+    "sha": "fbf76edcf5791b1d9743955b85caf0a19974d5a6",
+    "files": 159,
+    "test_files": 11,
+    "license": "LICENSE"
+  },
+  {
+    "name": "buildsuite_core",
+    "sha": "b93246cd4e9bc365ff2eafd8f6b6a72999134502",
+    "files": 979,
+    "test_files": 76,
+    "license": "license.txt"
+  },
+  {
+    "name": "openproject",
+    "sha": "3fb88148cee9329911cb8bdd2e9cdae88a97dae3",
+    "files": 25807,
+    "test_files": 448,
+    "license": "LICENSE"
+  },
+  {
+    "name": "frappe",
+    "sha": "7660724bec3ecd41e3c6f4d88638afdb227aee9c",
+    "files": 5511,
+    "test_files": 827,
+    "license": "LICENSE"
+  },
+  {
+    "name": "construction_management_suite",
+    "sha": "758a29cbfa894b20caeac4730ec95db6d0ff3b01",
+    "files": 319,
+    "test_files": 0,
+    "license": null
+  },
+  {
+    "name": "OpenConstructionERP",
+    "sha": "2d27b866937ea3bd66d3878707b357a3099ba7fa",
+    "files": 15554,
+    "test_files": 4994,
+    "license": "LICENSE"
+  }
+]

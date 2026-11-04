@@ -1,0 +1,46 @@
+{
+  "doctype": "DocType",
+  "name": "VORQ Company Member",
+  "module": "VORQ",
+  "autoname": "hash",
+  "track_changes": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "user",
+    "company",
+    "role"
+  ],
+  "fields": [
+    {
+      "fieldname": "user",
+      "label": "User",
+      "fieldtype": "Link",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Link",
+      "options": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "role",
+      "label": "Role",
+      "fieldtype": "Select",
+      "options": "Owner\nProject Manager\nQuantity Surveyor\nSite Engineer\nStorekeeper\nProcurement Officer\nAccountant\nSubcontractor",
+      "reqd": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1
+    }
+  ]
+}
