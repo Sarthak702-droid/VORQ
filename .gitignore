@@ -3,3 +3,7 @@ dist
 .env
 .env.local
 *.log
+integration-workspace
+.agents
+.aws
+.codex
