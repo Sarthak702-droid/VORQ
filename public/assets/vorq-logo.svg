@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="75 40 620 430" fill="none">
+  <defs>
+    <linearGradient id="left" x1="119" y1="107" x2="329" y2="444" gradientUnits="userSpaceOnUse"><stop stop-color="#8877ff"/><stop offset=".38" stop-color="#262796"/><stop offset=".7" stop-color="#2600a9"/><stop offset="1" stop-color="#ed1bff"/></linearGradient>
+    <linearGradient id="right" x1="612" y1="57" x2="343" y2="446" gradientUnits="userSpaceOnUse"><stop stop-color="#00dfbf"/><stop offset=".37" stop-color="#00bebc"/><stop offset=".66" stop-color="#0068af"/><stop offset="1" stop-color="#00eaff"/></linearGradient>
+    <linearGradient id="fold" x1="359" y1="258" x2="364" y2="449" gradientUnits="userSpaceOnUse"><stop stop-color="#c0ffff"/><stop offset=".2" stop-color="#00b6ff"/><stop offset=".72" stop-color="#003cea"/><stop offset="1" stop-color="#00ffff"/></linearGradient>
+    <linearGradient id="rim" x1="97" y1="125" x2="642" y2="395" gradientUnits="userSpaceOnUse"><stop stop-color="#7151ff"/><stop offset=".4" stop-color="#b5eaff"/><stop offset=".64" stop-color="#00ffff"/><stop offset="1" stop-color="#007880"/></linearGradient>
+    <linearGradient id="shine" x1="361" y1="74" x2="401" y2="273" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity=".52"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
+    <radialGradient id="flash"><stop stop-color="white"/><stop offset=".35" stop-color="#baffff" stop-opacity=".8"/><stop offset="1" stop-color="#00ffff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <path d="M105 109H235C264 109 279 119 294 145L360 258L466 79C478 59 499 52 528 52H663C679 52 683 58 674 74L478 421C467 443 453 452 427 452H287C267 452 257 446 246 427L92 131C84 116 89 109 105 109Z" fill="url(#left)" stroke="url(#rim)" stroke-width="4"/>
+  <path d="M360 258L466 79C478 59 499 52 528 52H663C679 52 683 58 674 74L478 421C467 443 453 452 427 452H287L360 258Z" fill="url(#right)" stroke="#00e5e6" stroke-width="2"/>
+  <path d="M102 124C128 110 198 111 236 116C262 119 275 130 288 153L357 270C254 273 164 246 139 210L102 137C99 131 99 127 102 124Z" fill="url(#shine)"/>
+  <path d="M369 259L476 84C486 65 505 60 533 60H650C659 60 663 64 656 77L588 197C563 235 476 265 369 272Z" fill="url(#shine)" opacity=".65"/>
+  <path d="M360 258L459 434C449 445 438 448 420 448H287C275 448 267 445 262 439L360 258Z" fill="url(#fold)" stroke="#89ffff" stroke-width="1.6"/>
+  <path d="M106 111H235C264 111 278 123 291 147L355 255M365 252L470 80C482 61 502 55 530 55H665M269 439C302 447 419 445 451 435" stroke="white" stroke-opacity=".8" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="360" cy="264" r="15" fill="url(#flash)"/><path d="M360 254L362 263L367 265L362 267L360 276L358 267L353 265L358 263Z" fill="white"/>
+</svg>

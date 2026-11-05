@@ -104,6 +104,8 @@ def _schema(module):
 
 @frappe.whitelist(methods=["GET"])
 def session():
+    from vorq.auth_flow import require_assurance
+    require_assurance()
     if frappe.session.user == "Guest":
         frappe.throw("Sign in to continue.", frappe.AuthenticationError)
     companies = frappe.get_all("Company", pluck="name") if frappe.session.user == "Administrator" else frappe.get_all("VORQ Company Member", filters={"user": frappe.session.user}, pluck="company")
@@ -365,3 +367,24 @@ def signup(full_name, email, password):
     """Register an unprivileged identity; workspace access requires verified membership."""
     from vorq.registration import register
     return register(full_name, email, password)
+
+
+@frappe.whitelist(allow_guest=True, methods=["GET"])
+def auth_challenge():
+    from vorq.auth_flow import challenge
+    return challenge()
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def auth_start(usr, pwd, captcha_id, captcha_answer):
+    from vorq.auth_flow import start
+    return start(usr, pwd, captcha_id, captcha_answer)
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def auth_signup(full_name, username, email, password, requested_role, company_name, role_details, captcha_id, captcha_answer):
+    from vorq.auth_flow import signup
+    return signup(full_name, username, email, password, requested_role, company_name, role_details, captcha_id, captcha_answer)
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def auth_finish(challenge_token, code):
+    from vorq.auth_flow import finish
+    return finish(challenge_token, code)

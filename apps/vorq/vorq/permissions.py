@@ -7,6 +7,18 @@ import frappe
 def guard_api():
     path = frappe.request.path if frappe.request else ""
     command = frappe.form_dict.get("cmd") if frappe.form_dict else None
+    public = {"auth_challenge", "auth_start", "auth_signup", "auth_finish"}
+    method = path.rsplit("/", 1)[-1]
+    if path == "/api/method/logout" and not command:
+        return
+    if path.startswith("/api/method/vorq.api.v1.") and method.split(".")[-1] in public:
+        if command and command != method:
+            frappe.throw("Unsupported authentication route.", frappe.PermissionError)
+        return
+    if path.startswith("/api/") or command:
+        if frappe.session.user != "Guest":
+            from vorq.auth_flow import require_assurance
+            require_assurance()
     if frappe.session.user == "Administrator":
         return
     if command and command not in {"login", "logout", "frappe.auth.get_logged_user"} and not command.startswith("vorq.api.v1."):
@@ -22,6 +34,8 @@ def guard_api():
 def member(company):
     if frappe.session.user == "Guest":
         frappe.throw("Sign in to continue.", frappe.AuthenticationError)
+    from vorq.auth_flow import require_assurance
+    require_assurance()
     if frappe.session.user == "Administrator":
         return "Owner"
     role = frappe.db.get_value("VORQ Company Member", {"user": frappe.session.user, "company": company}, "role")

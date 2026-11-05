@@ -20,6 +20,10 @@ Wait for `create-site` to exit successfully before signing in. Inspect it with:
 docker compose --env-file deployment/.env -f deployment/compose.yaml logs create-site
 ```
 
+After backend changes, rerun `bash scripts/dev-up.sh`. It rebuilds the application image, migrates the existing site, restarts Python workers, and checks the deployed CAPTCHA and authentication routes. Application code is baked into the image; copying files into a running container is temporary and is lost on recreation. A frontend calling new methods against an older image produces errors such as `vorq.api.v1 has no attribute auth_challenge`.
+
+To check the running authentication deployment independently, run `python3 scripts/verify-auth-deployment.py`. This check creates no users or authenticated sessions.
+
 Open http://127.0.0.1:15173. Local administrator: `Administrator`; generated password is stored in ignored `deployment/.env`. This is a development stack, not a production deployment.
 
 Create company/accounting masters through administrator Desk, or run the isolated development acceptance story (creates clearly labeled test records):

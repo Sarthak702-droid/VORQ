@@ -13,3 +13,10 @@ doc_events = {
     "Measurement Book": {"before_validate": "vorq.validation.validate_measurement"},
     "Subcontractor Bill": {"before_validate": "vorq.validation.prepare_ra_bill"},
 }
+
+before_login = "vorq.auth_flow.block_legacy_login"
+on_logout = "vorq.auth_flow.revoke_session"
+
+after_migrate = ["vorq.auth_flow.prepare_schema"]
+
+scheduler_events = {"daily": ["vorq.auth_flow.cleanup_sessions"]}

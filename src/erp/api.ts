@@ -46,9 +46,10 @@ export async function api<T>(
       response.status,
     );
   }
+  if (response.status >= 500) throw new ApiError('VORQ is temporarily unavailable. Please try again.', response.status);
   if (!response.ok || data.exc) {
     const invalidLogin =
-      method === "login" &&
+      ["login", "auth_start"].includes(method) &&
       [401, 403].includes(response.status) &&
       data.exc_type !== "CSRFTokenError";
     let message = invalidLogin
@@ -60,7 +61,7 @@ export async function api<T>(
           : "The server could not complete this request.";
     try {
       const messages = JSON.parse(data._server_messages || "[]");
-      if (messages.length && !invalidLogin)
+      if (messages.length && (!invalidLogin || method.startsWith("auth_")))
         message = JSON.parse(messages[messages.length - 1]).message.replace(
           /<[^>]*>/g,
           "",
