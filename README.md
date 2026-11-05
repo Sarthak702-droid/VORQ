@@ -214,7 +214,7 @@ VORQ/
 
 ## React Native mobile app
 
-A separate Expo + TypeScript application is available in [`mobile/`](mobile/README.md). It supports local projects, measured billing drafts, manual deductions, draft sharing and daily site records with persistent device storage. It does not yet connect to ERPNext or post financial transactions.
+A separate Expo + TypeScript application is available in [`mobile/`](mobile/README.md). It connects to the VORQ Frappe/ERPNext backend for login, assigned projects, invoices, site reports and server-authorised document workflows. See the mobile guide for backend setup, the required compatibility patch, native API configuration and verified scope.
 
 ```bash
 cd mobile

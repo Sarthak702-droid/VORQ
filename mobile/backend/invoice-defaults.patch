@@ -1,0 +1,45 @@
+--- a/apps/vorq/vorq/api/v1.py
++++ b/apps/vorq/vorq/api/v1.py
+@@ -251,6 +251,11 @@
+         doc.save()
+     else:
+         doc = frappe.get_doc({"doctype": _entry(module)[0], **clean})
++        if module in {"sales-invoices", "purchase-invoices"}:
++            # Native clients do not execute Desk's customer/item onchange calls.
++            # Derive currency, exchange-rate, party and item defaults upstream.
++            doc.check_permission("create")
++            doc.run_method("set_missing_values")
+         if module != "projects":
+             _scope(doc, company, project)
+         doc.insert()
+@@ -325,7 +330,7 @@
+ @frappe.whitelist(methods=["GET"])
+ def lookup(doctype, company, project=None, query=""):
+     role = member(company)
+-    masters = {"Customer", "Supplier", "Item", "Warehouse", "UOM", "Item Group", "Supplier Group", "Customer Group", "Territory", "Employee", "Account", "Cost Center", "Stock Entry Type"}
++    masters = {"Customer", "Supplier", "Item", "Warehouse", "UOM", "Item Group", "Supplier Group", "Customer Group", "Territory", "Employee", "Account", "Cost Center", "Stock Entry Type", "Price List"}
+     scoped = {"Task", "BOQ", "BOQ Group", "Subcontractor Work Order", "Purchase Order", "Purchase Receipt", "Material Request", "Sales Invoice", "Purchase Invoice"}
+     if doctype not in masters | scoped:
+         frappe.throw("Lookup is not available for this field.", frappe.PermissionError)
+@@ -335,6 +340,8 @@
+     meta = frappe.get_meta(doctype)
+     if meta.has_field("company"):
+         filters["company"] = company
++    if doctype == "Price List":
++        filters["enabled"] = 1
+     if doctype in scoped:
+         project_access(project, company)
+         if meta.has_field("project"):
+--- a/apps/vorq/vorq/catalog.py
++++ b/apps/vorq/vorq/catalog.py
+@@ -18,8 +18,8 @@
+  "subcontracts": ("Subcontractor Work Order", ["subcontractor", "date", "retention_percent", "lines"], ["Owner", "Quantity Surveyor"]),
+  "measurements": ("Measurement Book", ["work_order", "date", "entries", "remarks"], ["Owner", "Quantity Surveyor", "Site Engineer"]),
+  "ra-bills": ("Subcontractor Bill", ["work_order", "date", "supplier_invoice_no", "supplier_invoice_date", "bill_type", "advance_recovery", "expense_account", "lines"], ["Owner", "Quantity Surveyor"]),
+- "sales-invoices": ("Sales Invoice", ["customer", "posting_date", "due_date", "items"], ["Owner", "Accountant"]),
+- "purchase-invoices": ("Purchase Invoice", ["supplier", "posting_date", "bill_no", "bill_date", "items"], ["Owner", "Accountant"]),
++ "sales-invoices": ("Sales Invoice", ["customer", "selling_price_list", "posting_date", "due_date", "items"], ["Owner", "Accountant"]),
++ "purchase-invoices": ("Purchase Invoice", ["supplier", "buying_price_list", "posting_date", "bill_no", "bill_date", "items"], ["Owner", "Accountant"]),
+  "payments": ("Payment Entry", ["payment_type", "party_type", "party", "posting_date", "paid_from", "paid_to", "paid_amount", "received_amount", "reference_no", "reference_date", "references"], ["Owner", "Accountant"]),
+  "expenses": ("Journal Entry", ["voucher_type", "posting_date", "user_remark", "accounts"], ["Owner", "Accountant"]),
+ }

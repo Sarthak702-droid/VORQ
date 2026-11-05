@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-11-05T05:51:59.174Z",
+  "login": true,
+  "assignedProjects": 2,
+  "csrfEnforced": true,
+  "projectScopeEnforced": true,
+  "reportSaved": "rni6bdni2u",
+  "idempotency": true,
+  "keyReuseRejected": true,
+  "reportReloaded": true,
+  "invoiceDraftSaved": "ACC-SINV-2026-00001",
+  "invoiceDraftReloaded": true,
+  "invoiceIdempotency": true,
+  "financialPosting": false,
+  "logoutEnforced": true
+}
