@@ -23,7 +23,10 @@ interface WorkspaceState {
   checking: boolean;
   busy: boolean;
   error: string;
-  login: (user: string, password: string) => Promise<void>;
+  login: (
+    challenge: string,
+    code: string,
+  ) => Promise<{ recovery_codes: string[] }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
   selectCompany: (company: string) => Promise<void>;
@@ -112,12 +115,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       unsubscribe();
     };
   }, [refresh, reset]);
-  async function login(user: string, password: string) {
+  async function login(challenge: string, code: string) {
     setBusy(true);
     setError("");
     try {
-      await client.request("login", { usr: user.trim(), pwd: password }, true);
-      await refresh();
+      return await client.request<{ recovery_codes: string[] }>(
+        "auth_finish",
+        { challenge_token: challenge, code: code.trim() },
+        true,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign in failed.");
       throw err;

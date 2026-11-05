@@ -1,0 +1,115 @@
+--- a/hooks.py
++++ b/hooks.py
+@@ -13,3 +13,10 @@
+     "Measurement Book": {"before_validate": "vorq.validation.validate_measurement"},
+     "Subcontractor Bill": {"before_validate": "vorq.validation.prepare_ra_bill"},
+ }
++
++before_login = "vorq.auth_flow.block_legacy_login"
++on_logout = "vorq.auth_flow.revoke_session"
++
++after_migrate = ["vorq.auth_flow.prepare_schema"]
++
++scheduler_events = {"daily": ["vorq.auth_flow.cleanup_sessions"]}
+--- a/permissions.py
++++ b/permissions.py
+@@ -7,6 +7,18 @@
+ def guard_api():
+     path = frappe.request.path if frappe.request else ""
+     command = frappe.form_dict.get("cmd") if frappe.form_dict else None
++    public = {"auth_challenge", "auth_start", "auth_signup", "auth_finish"}
++    method = path.rsplit("/", 1)[-1]
++    if path == "/api/method/logout" and not command:
++        return
++    if path.startswith("/api/method/vorq.api.v1.") and method.split(".")[-1] in public:
++        if command and command != method:
++            frappe.throw("Unsupported authentication route.", frappe.PermissionError)
++        return
++    if path.startswith("/api/") or command:
++        if frappe.session.user != "Guest":
++            from vorq.auth_flow import require_assurance
++            require_assurance()
+     if frappe.session.user == "Administrator":
+         return
+     if command and command not in {"login", "logout", "frappe.auth.get_logged_user"} and not command.startswith("vorq.api.v1."):
+@@ -22,6 +34,8 @@
+ def member(company):
+     if frappe.session.user == "Guest":
+         frappe.throw("Sign in to continue.", frappe.AuthenticationError)
++    from vorq.auth_flow import require_assurance
++    require_assurance()
+     if frappe.session.user == "Administrator":
+         return "Owner"
+     role = frappe.db.get_value("VORQ Company Member", {"user": frappe.session.user, "company": company}, "role")
+--- a/api/v1.py
++++ b/api/v1.py
+@@ -104,6 +104,8 @@
+ 
+ @frappe.whitelist(methods=["GET"])
+ def session():
++    from vorq.auth_flow import require_assurance
++    require_assurance()
+     if frappe.session.user == "Guest":
+         frappe.throw("Sign in to continue.", frappe.AuthenticationError)
+     companies = frappe.get_all("Company", pluck="name") if frappe.session.user == "Administrator" else frappe.get_all("VORQ Company Member", filters={"user": frappe.session.user}, pluck="company")
+@@ -365,3 +367,24 @@
+     """Register an unprivileged identity; workspace access requires verified membership."""
+     from vorq.registration import register
+     return register(full_name, email, password)
++
++
++@frappe.whitelist(allow_guest=True, methods=["GET"])
++def auth_challenge():
++    from vorq.auth_flow import challenge
++    return challenge()
++
++@frappe.whitelist(allow_guest=True, methods=["POST"])
++def auth_start(usr, pwd, captcha_id, captcha_answer):
++    from vorq.auth_flow import start
++    return start(usr, pwd, captcha_id, captcha_answer)
++
++@frappe.whitelist(allow_guest=True, methods=["POST"])
++def auth_signup(full_name, username, email, password, requested_role, company_name, role_details, captcha_id, captcha_answer):
++    from vorq.auth_flow import signup
++    return signup(full_name, username, email, password, requested_role, company_name, role_details, captcha_id, captcha_answer)
++
++@frappe.whitelist(allow_guest=True, methods=["POST"])
++def auth_finish(challenge_token, code):
++    from vorq.auth_flow import finish
++    return finish(challenge_token, code)
+--- a/registration.py
++++ b/registration.py
+@@ -1,31 +1,4 @@
+ import frappe
+-from frappe.rate_limiter import rate_limit
+-from frappe.utils import validate_email_address
+ 
+-
+-@rate_limit(limit=5, seconds=600, methods=["POST"], ip_based=True)
+-def register(full_name, email, password):
+-    if frappe.session.user != "Guest":
+-        frappe.throw("Sign out before registering a new account.", frappe.PermissionError)
+-    if not all(isinstance(value, str) for value in (full_name, email, password)):
+-        frappe.throw("Name, email and password are required.", frappe.ValidationError)
+-    full_name = full_name.strip()
+-    email = email.strip().lower()
+-    if not 2 <= len(full_name) <= 100 or any(c in full_name for c in '<>\r\n'):
+-        frappe.throw("Enter your name using 2 to 100 characters.", frappe.ValidationError)
+-    if len(email) > 140 or validate_email_address(email, throw=False) != email:
+-        frappe.throw("Enter a valid email address.", frappe.ValidationError)
+-    if not 12 <= len(password) <= 128:
+-        frappe.throw("Use a password with 12 to 128 characters.", frappe.ValidationError)
+-    response = {"message": "Registration received. Sign in with your credentials. New accounts need administrator verification and workspace access.", "access": "pending_verification"}
+-    # Never change a pre-existing identity or password, or infer company from an email domain.
+-    if frappe.db.exists("User", email):
+-        return response
+-    user = frappe.get_doc({
+-        "doctype": "User", "email": email, "first_name": full_name,
+-        "enabled": 1, "user_type": "Website User", "new_password": password,
+-        "send_welcome_email": 0, "roles": [],
+-    })
+-    user.flags.no_welcome_mail = True
+-    user.insert(ignore_permissions=True)  # Only fixed, unprivileged fields above; no caller-controlled roles.
+-    return response
++def register(*args, **kwargs):
++    frappe.throw("Use VORQ signup with CAPTCHA and authenticator setup.", frappe.AuthenticationError)

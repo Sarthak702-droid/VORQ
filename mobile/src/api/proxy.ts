@@ -1,6 +1,6 @@
 // Server-only fixed-upstream proxy; never import this module in a native screen.
 const allowed =
-  /^\/api\/method\/(?:login|logout|vorq\.api\.v1\.(?:session|workspace|records|detail|save|transition|overview|lookup))$/;
+  /^\/api\/method\/(?:login|logout|vorq\.api\.v1\.(?:session|workspace|records|detail|save|transition|overview|lookup|auth_challenge|auth_start|auth_signup|auth_finish))$/;
 export async function proxyRequest(
   request: Request,
   target = process.env.VORQ_BACKEND_URL || "http://127.0.0.1:18080",

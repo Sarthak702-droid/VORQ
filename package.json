@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:auth": "node --experimental-strip-types --test --test-isolation=none tests/auth-api.test.mjs",
+    "test:auth:policy": "python3 -m unittest discover -s tests -v",
+    "test:auth:live": "python3 tests/verify_auth_live.py"
   },
   "dependencies": {
     "clsx": "^2.1.1",

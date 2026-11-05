@@ -1,0 +1,23 @@
+{
+  "verified_at": "2026-11-05T06:39:12Z",
+  "image_captcha": true,
+  "legacy_bypass_blocked": true,
+  "captcha_single_use": true,
+  "weak_password_rejected": true,
+  "qr_enrolment": true,
+  "no_session_before_totp": true,
+  "totp_enrolment_verified": true,
+  "role_request_does_not_grant_access": true,
+  "logout_revokes_access": true,
+  "username_login": true,
+  "totp_replay_rejected": true,
+  "recovery_code_single_use": true,
+  "expired_challenge_rejected": true,
+  "factor_lockout_across_challenges": true,
+  "encrypted_totp_storage": true,
+  "hashed_recovery_storage": true,
+  "rbac_no_self_promotion": true,
+  "session_records_revoked": true,
+  "test_identity": "vorq-auth-test-67a4d07d04@example.invalid",
+  "financial_postings": false
+}

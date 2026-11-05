@@ -165,3 +165,50 @@ test("proxy forwards session and CSRF to the fixed backend, preserving HTTP stat
   assert.match(response.headers.get("set-cookie"), /HttpOnly/);
   assert.equal((await response.json()).message.name, "P-1");
 });
+
+test("TOTP completion persists native sid and CAPTCHA errors do not expire a session", async () => {
+  let sid = "";
+  let expired = false;
+  const client = createClient({
+    onCookie: async (value) => {
+      sid = value;
+    },
+    onExpired: () => {
+      expired = true;
+    },
+    fetcher: async () =>
+      Response.json(
+        { message: { authenticated: true, recovery_codes: [] } },
+        { headers: { "set-cookie": "sid=verified; HttpOnly; Path=/" } },
+      ),
+  });
+  await client.request(
+    "auth_finish",
+    { challenge_token: "pending", code: "123456" },
+    true,
+  );
+  assert.equal(sid, "verified");
+  const invalid = createClient({
+    onExpired: () => {
+      expired = true;
+    },
+    fetcher: async () =>
+      Response.json(
+        {
+          exc: true,
+          exc_type: "AuthenticationError",
+          _server_messages: JSON.stringify([
+            JSON.stringify({
+              message: "Security image is incorrect or expired.",
+            }),
+          ]),
+        },
+        { status: 401 },
+      ),
+  });
+  await assert.rejects(
+    invalid.request("auth_start", {}, true),
+    /Security image/,
+  );
+  assert.equal(expired, false);
+});

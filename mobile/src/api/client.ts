@@ -8,6 +8,10 @@ export class ApiError extends Error {
 }
 const methods = new Set([
   "login",
+  "auth_challenge",
+  "auth_start",
+  "auth_signup",
+  "auth_finish",
   "logout",
   "session",
   "workspace",
@@ -33,8 +37,12 @@ export function serverError(
     data.exc_type !== "CSRFTokenError"
   )
     return "Username or password is incorrect.";
-  if (status === 401 || data.exc_type === "AuthenticationError")
+  if (
+    !method.startsWith("auth_") &&
+    (status === 401 || data.exc_type === "AuthenticationError")
+  )
     return "Your session has expired. Please sign in again.";
+  if (status >= 500) return "The VORQ server is unavailable. Please try again.";
   if (status === 429) return "Too many attempts. Please wait and try again.";
   try {
     const messages = JSON.parse(String(data._server_messages || "[]"));
@@ -44,6 +52,8 @@ export function serverError(
   } catch {
     /* Never expose server traceback or HTML. */
   }
+  if (method === "auth_start" && [401, 403].includes(status))
+    return "Username or password is incorrect.";
   return status === 403
     ? "Your VORQ account does not have permission for this action."
     : "VORQ could not complete this request. Please try again.";
@@ -113,6 +123,7 @@ export function createClient({
       if (!response.ok || data.exc) {
         if (
           method !== "login" &&
+          !method.startsWith("auth_") &&
           (response.status === 401 || data.exc_type === "AuthenticationError")
         )
           onExpired?.();
@@ -126,7 +137,11 @@ export function createClient({
           "Two-factor verification is required. Sign in through your organisation’s secure login.",
           403,
         );
-      if (method === "login" && response.ok && onCookie) {
+      if (
+        (method === "login" || method === "auth_finish") &&
+        response.ok &&
+        onCookie
+      ) {
         const match = response.headers
           .get("set-cookie")
           ?.match(/(?:^|[,;]\s*)sid=([^;,\s]+)/);

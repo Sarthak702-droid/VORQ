@@ -20,7 +20,7 @@ Use the same account as VORQ desktop. Existing local development administrator c
 
 Native clients call Frappe directly. Set `EXPO_PUBLIC_API_URL` to the reachable VORQ API origin. Development defaults are Android emulator `http://10.0.2.2:18080` and iOS simulator `http://localhost:18080`. A physical phone needs a reachable HTTPS backend; the existing Docker endpoint is bound to computer loopback and is not reachable from another device. Release builds require an HTTPS origin and fail clearly if it is missing.
 
-Session cookies are stored by the browser as HttpOnly cookies. Native session IDs use Expo SecureStore, scoped by backend origin. Passwords are never persisted. Two-factor logins stop with an explicit verification-required message; a native 2FA/OAuth flow is not implemented. No CORS or CSRF protection is disabled.
+Session cookies are stored by the browser as HttpOnly cookies. Native session IDs use Expo SecureStore, scoped by backend origin. Passwords are never persisted. The native UI supports TOTP enrolment, authenticator-code login and one-use recovery codes. OAuth is not implemented. No CORS or CSRF protection is disabled.
 
 ## Connected workflows
 
@@ -56,7 +56,11 @@ Do not apply the patch twice. Invoice defaults come from ERPNext controllers and
 
 Every interface icon is an unmodified component from the official `lucide-react-native` package. There are no custom-generated interface icon paths. See `THIRD_PARTY_NOTICES.md` for attribution. The UI uses standard rows, compact forms, neutral surfaces and restrained colour.
 
-## Verification
+## Authentication upgrade and verification
+
+Both mobile and web now use the shared CAPTCHA → password/signup → authenticator challenge → verified Frappe-session protocol. See [the complete auth guide](../backend/auth-upgrade/README.md) for schema, recovery, RBAC approval and deployment. The previous password-only runner is superseded; `npm run test:backend` now invokes the shared live-auth acceptance suite.
+
+Signup collects email, unique username, strong password, company/requested role and the details for that role. Users cannot assign themselves ERP roles or company membership. QR enrolment requires a valid TOTP before it becomes enabled. Recovery codes are shown once. Email ownership is not automatically verified by this release.
 
 ```bash
 npm run lint
@@ -65,8 +69,6 @@ npm test
 npx expo export --platform web --platform android --platform ios
 ```
 
-`npm run test:backend` runs the real API client through the Expo server against the isolated **VORQ Development** company. It reads the existing local development password without printing it. It creates/updates one clearly labelled site report and saves one synthetic ₹1 **unsubmitted invoice draft**. It checks CSRF, project scope, persistence, idempotent retries, key reuse rejection and logout. It never submits an invoice, posts a payment, or creates privileged users. See `backend-verification.json` for evidence.
+The earlier invoice-draft acceptance record in `backend-verification.json` is historical evidence from before mandatory MFA. Current auth evidence is in `../auth-verification.json`. The shared live suite uses a fresh unprivileged synthetic identity and creates no financial postings. A real user's authenticator must be enrolled by that user; development tests never enrol Administrator.
 
-The local development site initially had no enabled price lists. A named `VORQ Mobile Verification` price-list master was created solely for these checks; `backend/verify_fixture.py` documents that local-only setup. It is not a production default.
-
-Native JavaScript bundle checks are not a signed APK/IPA or physical-device test. Physical-phone authentication, SecureStore restoration, network loss and final deployment configuration still require device testing before release. Camera/attachments, offline sync, dedicated GST reporting and app-store delivery are not implemented by this change.
+Native bundle generation is not a signed APK/IPA or physical-phone test. SecureStore restoration, actual authenticator-app scanning on a phone, network loss and final HTTPS deployment still require device validation. Camera/attachments, offline sync and app-store delivery remain outside this auth upgrade.
