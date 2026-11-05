@@ -18,8 +18,8 @@ CATALOG = {
  "subcontracts": ("Subcontractor Work Order", ["subcontractor", "date", "retention_percent", "lines"], ["Owner", "Quantity Surveyor"]),
  "measurements": ("Measurement Book", ["work_order", "date", "entries", "remarks"], ["Owner", "Quantity Surveyor", "Site Engineer"]),
  "ra-bills": ("Subcontractor Bill", ["work_order", "date", "supplier_invoice_no", "supplier_invoice_date", "bill_type", "advance_recovery", "expense_account", "lines"], ["Owner", "Quantity Surveyor"]),
- "sales-invoices": ("Sales Invoice", ["customer", "posting_date", "due_date", "items"], ["Owner", "Accountant"]),
- "purchase-invoices": ("Purchase Invoice", ["supplier", "posting_date", "bill_no", "bill_date", "items"], ["Owner", "Accountant"]),
+ "sales-invoices": ("Sales Invoice", ["customer", "selling_price_list", "posting_date", "due_date", "items"], ["Owner", "Accountant"]),
+ "purchase-invoices": ("Purchase Invoice", ["supplier", "buying_price_list", "posting_date", "bill_no", "bill_date", "items"], ["Owner", "Accountant"]),
  "payments": ("Payment Entry", ["payment_type", "party_type", "party", "posting_date", "paid_from", "paid_to", "paid_amount", "received_amount", "reference_no", "reference_date", "references"], ["Owner", "Accountant"]),
  "expenses": ("Journal Entry", ["voucher_type", "posting_date", "user_remark", "accounts"], ["Owner", "Accountant"]),
 }
