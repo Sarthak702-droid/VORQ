@@ -211,3 +211,13 @@ VORQ/
 - **VORQ Core App**: Licensed under the [MIT License](LICENSE).
 - **ERP Foundation**: ERPNext and Frappe Framework are licensed under GNU General Public License v3.0 (GPL-3.0).
 - **Construction Workflows**: BuildSuite Core baseline is licensed under MIT.
+
+## React Native mobile app
+
+A separate Expo + TypeScript application is available in [`mobile/`](mobile/README.md). It supports local projects, measured billing drafts, manual deductions, draft sharing and daily site records with persistent device storage. It does not yet connect to ERPNext or post financial transactions.
+
+```bash
+cd mobile
+npm ci
+npm start
+```
