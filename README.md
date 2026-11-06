@@ -23,6 +23,10 @@ npm start -- --web --port 8082 --localhost
 
 Mobile browser preview: `http://localhost:8082`. Native-device connection and HTTPS configuration are documented in [mobile/README.md](mobile/README.md).
 
+## Architecture
+
+The backend is a modular monolith: business modules run inside one Frappe application, share its transaction boundary and tenant database, and use ERPNext/BuildSuite controllers for authoritative operations. The stable `vorq.api.v1` facade serves both web and mobile. Domain contracts and construction lifecycle rules live under `vorq/modules/`; application services coordinate access checks, scoped records and idempotency. See [module boundaries and deployment](integration-workspace/docs/architecture/MODULAR_MONOLITH.md).
+
 ## Authentication
 
 - Shared signup/login with email, unique username, strong password, requested role/company and role-specific details.
@@ -39,12 +43,17 @@ The web ERP workspace loads authorised planning, procurement, stock, contract an
 
 The old mock components remain as reference and are not loaded by the web or mobile entry points. Earlier local-only mobile records are not automatically imported into server accounts.
 
+## Verification evidence
+
+See [the full local test report](docs/TEST_REPORT.md) for regression coverage, fixed defects, browser evidence and remaining limits. Live suites are available as `npm run test:backend:live` and `npm run test:http:live`; the latter requires the web dev server on port 5173.
+
 ## Checks
 
 ```bash
 npm run build
 npm run test:auth
 npm run test:auth:policy
+npm run test:architecture
 ```
 
 See `auth-verification.json` for local live-auth evidence. The live suite uses an unprivileged synthetic identity, posts no financial transactions, and never enrols a real administrator. The backend and mobile guides document remaining physical-device and production deployment checks.

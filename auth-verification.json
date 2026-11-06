@@ -1,5 +1,5 @@
 {
-  "verified_at": "2026-11-05T06:39:12Z",
+  "verified_at": "2026-11-06T12:53:52Z",
   "image_captcha": true,
   "legacy_bypass_blocked": true,
   "captcha_single_use": true,
@@ -18,6 +18,6 @@
   "hashed_recovery_storage": true,
   "rbac_no_self_promotion": true,
   "session_records_revoked": true,
-  "test_identity": "vorq-auth-test-67a4d07d04@example.invalid",
+  "test_identity": "vorq-auth-test-9668be40a9@example.invalid",
   "financial_postings": false
 }

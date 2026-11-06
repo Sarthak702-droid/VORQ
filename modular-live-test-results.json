@@ -1,0 +1,8 @@
+{
+  "fixtures_rollback_verified": true,
+  "run": 15,
+  "failures": 0,
+  "errors": 0,
+  "successful": true,
+  "fixture_policy": "All QA users, memberships and business records rolled back. No financial postings."
+}

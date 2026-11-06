@@ -1,0 +1,61 @@
+{
+  "verified_at": "2026-11-06T18:24:43.901711+05:30",
+  "environment": "Local Docker Compose development site frontend",
+  "image": "sha256:1a200f5c52cd9dbdda210c409a80655827e1d430c63e26baf8ca0273988d5123",
+  "site_backup_with_files": true,
+  "migration_completed": true,
+  "services_up": [
+    "backend",
+    "frontend",
+    "queue-long",
+    "queue-short",
+    "scheduler",
+    "websocket",
+    "db",
+    "redis-cache",
+    "redis-queue"
+  ],
+  "shared_image_verified": [
+    "backend",
+    "frontend",
+    "queue-long",
+    "queue-short",
+    "scheduler"
+  ],
+  "auth_http_routes_verified": true,
+  "full_auth_acceptance": "auth-verification.json",
+  "read_contracts_verified": 22,
+  "workspace_verified": true,
+  "ra_bill_detail_verified": true,
+  "financial_overview_verified": true,
+  "supplier_lookup_verified": true,
+  "erp_acceptance": {
+    "company": "VORQ Development",
+    "project": "PROJ-0003",
+    "purchase_order": "PUR-ORD-2026-00002",
+    "purchase_receipt": "MAT-PRE-2026-00002",
+    "material_issue": "MAT-STE-2026-00002",
+    "purchase_invoice": "ACC-PINV-2026-00003",
+    "boq": "BOQ-00002",
+    "work_order": "SWO-2026-00002",
+    "measurement": "MB-2026-00002",
+    "ra_bill": "SB-2026-00003",
+    "ra_purchase_invoice": "ACC-PINV-2026-00004",
+    "retention": "40",
+    "stock_delta": "7",
+    "gl_balanced": true,
+    "idempotency_verified": true,
+    "nonmember_denied": true
+  },
+  "test_data": "The existing acceptance story created labeled development procurement, stock, BOQ, subcontract and invoice records. No bank transfer or payment acceptance was performed.",
+  "gateway_fix": "Restart frontend after backend restart to refresh the Nginx upstream address.",
+  "limits": [
+    "Local development verification; no production deployment performed.",
+    "Authenticated read contracts and ERP workflows verified through trusted bench; auth/session flow verified over HTTP."
+  ],
+  "deep_regression_verified_at": "2026-11-06T18:41:14.426044+05:30",
+  "current_image": "sha256:4ac020a7b987e74a29f3411cf1c068ce26a70c8c938bceb282f5bf8e1f13a42c",
+  "deep_regression_report": "docs/TEST_REPORT.md",
+  "live_database_regressions": "modular-live-test-results.json",
+  "authenticated_http_regressions": "modular-http-test-results.json"
+}

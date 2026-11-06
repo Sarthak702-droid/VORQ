@@ -1,0 +1,12 @@
+{
+  "security_checks_passed": true,
+  "checks": {
+    "captcha_route": 200,
+    "registration_roles": 8,
+    "raw_erp_path_blocked_status": 403,
+    "foreign_origin_blocked_status": 500
+  },
+  "limitations": [
+    "Expo development CORS middleware rejects the foreign origin with HTTP 500 before the application proxy; the application proxy returns 403 in its unit test."
+  ]
+}

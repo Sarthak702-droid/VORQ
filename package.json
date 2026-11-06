@@ -9,7 +9,11 @@
     "preview": "vite preview",
     "test:auth": "node --experimental-strip-types --test --test-isolation=none tests/auth-api.test.mjs",
     "test:auth:policy": "python3 -m unittest discover -s tests -v",
-    "test:auth:live": "python3 tests/verify_auth_live.py"
+    "test:auth:live": "python3 tests/verify_auth_live.py",
+    "test:architecture": "python3 -m unittest discover -s tests -p test_modular_architecture.py -v",
+    "test:backend:live": "python3 tests/verify_modular_live.py",
+    "test:http:live": "python3 tests/verify_modular_http.py",
+    "test:mobile-proxy:live": "python3 tests/verify_mobile_proxy_live.py"
   },
   "dependencies": {
     "clsx": "^2.1.1",
