@@ -13,6 +13,13 @@ import {
   Search,
   ShieldCheck,
   X,
+  CalendarDays,
+  Ruler,
+  Package,
+  FileCheck2,
+  Wallet,
+  TrendingUp,
+  CircleDollarSign,
 } from "lucide-react";
 import {
   api,
@@ -96,6 +103,14 @@ const labels: Record<string, string> = {
   payments: "Payments",
   expenses: "Expenses & journals",
 };
+const shortcuts = {
+  tasks: { icon: CalendarDays, description: "Plan the next milestone", tone: "blue" },
+  boqs: { icon: Ruler, description: "Build a clear cost picture", tone: "teal" },
+  "site-reports": { icon: HardHat, description: "Capture progress on site", tone: "amber" },
+  requests: { icon: Package, description: "Keep materials moving", tone: "blue" },
+  measurements: { icon: FileCheck2, description: "Track the work completed", tone: "teal" },
+  "ra-bills": { icon: Wallet, description: "Bring your billing together", tone: "amber" },
+};
 export default function ERPApp() {
   const [session, setSession] = useState<Session | null>(null),
     [checking, setChecking] = useState(true),
@@ -118,6 +133,23 @@ export default function ERPApp() {
     } | null>(null);
   const generation = useRef(0),
     requestKey = useRef(crypto.randomUUID());
+  const clearSession = () => {
+    generation.current++;
+    setSession(null);
+    setCompany("");
+    setWorkspace(null);
+    setProject("");
+    setModule("overview");
+    setPage(null);
+    setOverview(null);
+    setEditing(null);
+    setValues({});
+    setSearch("");
+    setNotice("");
+    setDrawer(false);
+    setBusy(false);
+    setCsrf("");
+  };
   const loadSession = async (afterLogin = false) => {
     if (!afterLogin) setChecking(true);
     setError("");
@@ -131,7 +163,7 @@ export default function ERPApp() {
         setError(
           "Unable to reach the VORQ backend. Check that the development stack is running.",
         );
-      setSession(null);
+      clearSession();
       if (afterLogin) throw err;
     } finally {
       setChecking(false);
@@ -141,7 +173,7 @@ export default function ERPApp() {
     void loadSession();
   }, []);
   useEffect(() => {
-    if (!company) return;
+    if (!company || !session) return;
     let active = true;
     setWorkspace(null);
     setPage(null);
@@ -159,7 +191,7 @@ export default function ERPApp() {
     return () => {
       active = false;
     };
-  }, [company]);
+  }, [company, session?.user]);
   const load = async () => {
     const stamp = ++generation.current;
     if (!company || !workspace) return;
@@ -276,9 +308,7 @@ export default function ERPApp() {
               onClick={async () => {
                 try {
                   await api("logout", {}, true);
-                  setSession(null);
-                  setWorkspace(null);
-                  setCsrf("");
+                  clearSession();
                 } catch (e) {
                   setError((e as Error).message);
                 }
@@ -295,14 +325,16 @@ export default function ERPApp() {
     setDrawer(false);
   };
   return (
-    <div className="min-h-screen bg-[#f5f6f3] text-slate-900">
+    <div className="workspace-app min-h-screen text-slate-900">
+      {drawer && <button type="button" aria-label="Dismiss navigation" className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden" onClick={() => setDrawer(false)} />}
       <aside
-        className={`${drawer ? "fixed inset-0 z-40" : "hidden"} lg:fixed lg:block lg:inset-y-0 lg:left-0 w-64 bg-[#102d30] text-slate-200 overflow-y-auto`}
+        className={`workspace-sidebar ${drawer ? "fixed inset-y-0 left-0 z-40" : "hidden"} lg:fixed lg:block lg:inset-y-0 lg:left-0 w-64 text-slate-200 overflow-y-auto`}
       >
         <div className="p-7 flex justify-between">
-          <span className="text-3xl font-black text-white tracking-tight">
-            VORQ<span className="text-lime-300">.</span>
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="brand-mark"><Building2 size={22} /></span>
+            <span className="text-2xl font-bold text-white tracking-[.12em]">VORQ<span className="text-teal-300">.</span></span>
+          </div>
           <button
             aria-label="Close navigation"
             className="lg:hidden"
@@ -312,7 +344,7 @@ export default function ERPApp() {
           </button>
         </div>
         <p className="px-7 text-[10px] tracking-[.2em] text-slate-400 uppercase mb-4">
-          Construction workspace
+          Your workspace
         </p>
         <nav className="px-3 pb-6">
           <button
@@ -342,11 +374,11 @@ export default function ERPApp() {
           ))}
         </nav>
         <div className="px-7 py-6 text-xs text-slate-400 border-t border-white/10">
-          One workspace. Connected operations.
+          <span className="flex items-center gap-2 text-slate-300"><ShieldCheck size={15} className="text-teal-300" /> Connected. In control.</span>
         </div>
       </aside>
       <div className="lg:ml-64">
-        <header className="bg-white border-b px-5 lg:px-9 py-4 flex flex-wrap gap-4 items-center justify-between">
+        <header className="workspace-topbar px-5 lg:px-9 py-4 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-3 items-center">
             <button
               aria-label="Open navigation"
@@ -355,7 +387,7 @@ export default function ERPApp() {
             >
               <Menu />
             </button>
-            <Building2 className="text-emerald-800" size={19} />
+            <span className="company-mark"><Building2 size={19} /></span>
             <select
               aria-label="Company"
               className="!w-auto !border-0 font-semibold !p-0"
@@ -368,18 +400,18 @@ export default function ERPApp() {
             </select>
           </div>
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-slate-500 hidden sm:block">
-              {workspace?.role}
-            </span>
-            <span className="font-medium">{session.full_name}</span>
+            <span className="user-avatar" aria-hidden="true">{session.full_name.split(" ").map((part) => part[0]).slice(0, 2).join("")}</span>
+            <div className="leading-tight">
+              <span className="block font-semibold">{session.full_name}</span>
+              <span className="block text-[11px] text-slate-500 mt-1">{workspace?.role || "Workspace member"}</span>
+            </div>
             <button
               aria-label="Sign out"
+              className="icon-button"
               onClick={async () => {
                 try {
                   await api("logout", {}, true);
-                  setSession(null);
-                  setWorkspace(null);
-                  setCsrf("");
+                  clearSession();
                 } catch (e) {
                   setError((e as Error).message);
                 }
@@ -394,7 +426,7 @@ export default function ERPApp() {
             Workspace <ChevronRight size={13} />
             {labels[module] || "Overview"}
           </div>
-          <div className="flex flex-wrap items-end justify-between gap-4 mb-7">
+          <div className="page-heading flex flex-wrap items-end justify-between gap-4 mb-7">
             <div>
               <p className="text-xs uppercase tracking-widest text-emerald-800 font-semibold mb-2">
                 {company}
@@ -467,31 +499,31 @@ export default function ERPApp() {
           )}
           {!busy && module === "overview" && (
             <>
-              <section className="bg-[#e9eedf] rounded-2xl p-7 lg:p-10 flex justify-between gap-4">
-                <div>
-                  <span className="text-xs uppercase tracking-widest text-emerald-900">
-                    Project control centre
+              <section className="project-hero rounded-2xl p-7 lg:p-10 flex justify-between gap-4">
+                <div className="relative z-10 min-w-0">
+                  <span className="hero-eyebrow">
+                    <span /> Project control centre
                   </span>
-                  <h2 className="text-3xl font-semibold mt-3">
+                  <h2 className="text-2xl sm:text-3xl font-semibold mt-5 max-w-xl leading-tight">
                     {currentProject?.project_name ||
                       "Your next project starts here"}
                   </h2>
-                  <p className="text-sm text-slate-600 mt-3">
+                  <p className="text-sm text-slate-300 mt-3">
                     {currentProject
                       ? `${currentProject.name} · ${currentProject.status}`
                       : "Create a project to connect planning, site operations and accounting."}
                   </p>
                   <button
-                    className="primary mt-6"
+                    className="hero-button mt-6"
                     onClick={() => navigate("projects")}
                   >
                     Open projects <ArrowUpRight size={16} />
                   </button>
                 </div>
-                <HardHat
-                  className="hidden sm:block text-emerald-900/20 shrink-0"
-                  size={120}
-                />
+                <div className="hero-art hidden sm:flex" aria-hidden="true">
+                  <div className="hero-art-ring"><Building2 size={72} strokeWidth={1} /></div>
+                  <span className="hero-art-label">BUILT FOR WHAT'S NEXT</span>
+                </div>
               </section>
               <div className="grid sm:grid-cols-3 gap-4 mt-6">
                 {[
@@ -518,13 +550,19 @@ export default function ERPApp() {
                         ).toLocaleString("en-IN", { maximumFractionDigits: 2 })
                       : "—",
                   ],
-                ].map(([label, value]) => (
-                  <article className="panel p-6" key={label}>
-                    <p className="text-sm text-slate-500">{label}</p>
+                ].map(([label, value], index) => (
+                  <article className="panel metric-card p-6" key={label}>
+                    <div className="flex justify-between items-center gap-2">
+                      <p className="text-sm text-slate-500">{label}</p>
+                      <span className={`metric-icon tone-${["teal", "amber", "blue"][index]}`}>
+                        {index === 0 ? <TrendingUp size={19} /> : index === 1 ? <Wallet size={19} /> : <CircleDollarSign size={19} />}
+                      </span>
+                    </div>
                     <p className="text-3xl font-semibold mt-4 tabular-nums">
                       {value}
                     </p>
-                    <p className="text-xs text-slate-400 mt-3">
+                    {index === 0 && <div className="progress-track mt-4"><div style={{ width: `${Math.min(100, Math.max(0, Number(overview?.progress) || 0))}%` }} /></div>}
+                    <p className="text-xs text-slate-500 mt-3 leading-relaxed">
                       {label === "Project progress"
                         ? "From the project record"
                         : "From the posted general ledger, in company currency"}
@@ -532,9 +570,10 @@ export default function ERPApp() {
                   </article>
                 ))}
               </div>
-              <h2 className="text-xl font-semibold mt-9 mb-4">
-                Keep the work moving
-              </h2>
+              <div className="flex items-end justify-between gap-3 mt-9 mb-4">
+                <div><h2 className="text-lg font-semibold">Your project toolkit</h2><p className="text-sm text-slate-500 mt-1">Everything you need to move work forward.</p></div>
+                <span className="hidden sm:block text-xs text-slate-500">Quick access</span>
+              </div>
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {workspace?.modules
                   .filter((m) =>
@@ -547,22 +586,20 @@ export default function ERPApp() {
                       "tasks",
                     ].includes(m.id),
                   )
-                  .map((m) => (
+                  .map((m) => {
+                    const shortcut = shortcuts[m.id as keyof typeof shortcuts];
+                    const Icon = shortcut.icon;
+                    return (
                     <button
-                      className="panel p-6 text-left hover:border-emerald-800 transition"
+                      className="panel shortcut-card p-5 text-left"
                       key={m.id}
                       onClick={() => navigate(m.id)}
                     >
-                      <ClipboardList
-                        size={22}
-                        className="text-emerald-800 mb-4"
-                      />
-                      <span className="font-semibold">{labels[m.id]}</span>
-                      <p className="text-xs text-slate-500 mt-2">
-                        Open workspace <span className="float-right">↗</span>
-                      </p>
+                      <div className="flex justify-between items-center mb-5"><span className={`shortcut-icon tone-${shortcut.tone}`}><Icon size={21} /></span><ArrowUpRight size={18} className="shortcut-arrow" /></div>
+                      <span className="font-semibold text-sm">{labels[m.id]}</span>
+                      <p className="text-xs text-slate-500 mt-2">{shortcut.description}</p>
                     </button>
-                  ))}
+                  );})}
               </div>
             </>
           )}
@@ -573,15 +610,15 @@ export default function ERPApp() {
             />
           )}
           {!busy && page && (
-            <section className="panel overflow-hidden">
-              <div className="p-5 border-b flex justify-between items-center gap-4">
+            <section className="panel records-panel overflow-hidden">
+              <div className="p-5 border-b flex flex-wrap justify-between items-center gap-4">
                 <span className="font-semibold text-sm">
                   {labels[module]}{" "}
                   <span className="text-slate-400 font-normal ml-2">
                     {page.records.length} loaded
                   </span>
                 </span>
-                <label className="flex items-center gap-2">
+                <label className="record-search flex items-center gap-2">
                   <Search size={16} className="text-slate-400" />
                   <input
                     className="!border-0 !p-0 !w-40 text-sm"

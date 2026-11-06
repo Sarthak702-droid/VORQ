@@ -118,9 +118,9 @@ export function AuthScreen({ onLogin }: { onLogin: () => Promise<void> }) {
   }
   const signup = mode === "signup";
   return (
-    <main className="min-h-screen bg-slate-50 px-5 py-10">
+    <main className="auth-screen min-h-screen px-5 py-10">
       <form
-        className="mx-auto max-w-md space-y-5 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm"
+        className="auth-card mx-auto max-w-md space-y-5 rounded-2xl border border-slate-200 bg-white p-7"
         onSubmit={(event) => {
           event.preventDefault();
           void submit();
