@@ -6,6 +6,7 @@ from decimal import Decimal
 import frappe
 from frappe.utils import today, getdate
 from vorq.api import v1
+from vorq.module_registry import CATALOG
 
 
 def run():
@@ -52,7 +53,7 @@ def run():
     items = [{"item_code": item_code, "qty": 10, "rate": 100, "warehouse": warehouse, "schedule_date": today()}]
     po = v1.save("purchase-orders", company, project, {"supplier": "VORQ Test Supplier", "transaction_date": today(), "schedule_date": today(), "items": items}, "po-acceptance-" + stamp)["name"]
     def submit(module, name):
-        doc = frappe.get_doc(v1._entry(module)[0], name)
+        doc = frappe.get_doc(CATALOG[module][0], name)
         return v1.transition(module, company, project, name, "Submit", str(doc.modified), "submit-" + name + "-" + stamp)
     submit("purchase-orders", po)
     po_doc = frappe.get_doc("Purchase Order", po)

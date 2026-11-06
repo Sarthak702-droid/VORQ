@@ -1,0 +1,42 @@
+"""Owned record contracts. Upstream DocTypes remain authoritative."""
+
+CATALOG = {'projects': ('Project',
+              ['project_name',
+               'customer',
+               'expected_start_date',
+               'expected_end_date',
+               'estimated_costing',
+               'status'],
+              ['Owner', 'Project Manager']),
+ 'tasks': ('Task',
+           ['subject',
+            'exp_start_date',
+            'exp_end_date',
+            'progress',
+            'status',
+            'is_milestone',
+            'depends_on'],
+           ['Owner', 'Project Manager']),
+ 'boqs': ('BOQ', ['title', 'revision', 'margin_rate', 'tax_rate'], ['Owner', 'Quantity Surveyor']),
+ 'boq-groups': ('BOQ Group', ['boq', 'code', 'group_name'], ['Owner', 'Quantity Surveyor']),
+ 'boq-items': ('BOQ Item',
+               ['boq',
+                'boq_group',
+                'code',
+                'description',
+                'unit',
+                'planned_qty',
+                'rate',
+                'cost_head'],
+               ['Owner', 'Quantity Surveyor'])}
+
+READ_FIELDS = {'boqs': ['status',
+          'planned_amount',
+          'margin_amount',
+          'tax_amount',
+          'total',
+          'approved_by',
+          'approved_date'],
+ 'boq-items': ['planned_amount']}
+
+FINANCIAL = set()

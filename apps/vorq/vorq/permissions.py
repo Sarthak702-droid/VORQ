@@ -41,6 +41,8 @@ def member(company):
     role = frappe.db.get_value("VORQ Company Member", {"user": frappe.session.user, "company": company}, "role")
     if not role:
         frappe.throw("Company access denied.", frappe.PermissionError)
+    if role == "Subcontractor":
+        frappe.throw("Subcontractor portal is not enabled.", frappe.PermissionError)
     return role
 
 

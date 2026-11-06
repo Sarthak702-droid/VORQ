@@ -1,5 +1,7 @@
 # System architecture — current implementation
 
+The VORQ application is a [modular monolith](MODULAR_MONOLITH.md): a stable HTTP facade delegates to application services and domain-owned contracts/policies within the same Frappe process and transaction boundary. See that guide for module ownership, dependency rules and verification.
+
 ```mermaid
 flowchart LR
  B[React VORQ browser] -->|same-origin cookie and CSRF| V[Versioned VORQ Frappe facade]
