@@ -31,7 +31,8 @@ import {
   setCsrf,
   Workspace,
 } from "./api";
-import { AuthScreen } from "./AuthScreen";
+import { PublicGate } from "./public/PublicGate";
+import { LogoMark } from "./public/Logo";
 import { defaults, RecordForm } from "./RecordForm";
 import { ScheduleTimeline } from "./ScheduleTimeline";
 type Session = {
@@ -259,26 +260,25 @@ export default function ERPApp() {
   };
   if (checking)
     return (
-      <div className="min-h-screen grid place-items-center text-slate-500">
-        Opening your workspace…
+      <div
+        role="status"
+        className="grid min-h-screen place-items-center bg-vq-paper text-vq-muted"
+      >
+        <div className="flex flex-col items-center gap-4 text-sm">
+          <LogoMark size={36} className="animate-pulse text-vq-ink" />
+          Opening your workspace…
+        </div>
       </div>
     );
   if (!session)
     return (
-      <>
-        <AuthScreen onLogin={() => loadSession(true)} />
-        {error && (
-          <div className="fixed bottom-4 right-4 max-w-md error" role="alert">
-            {error}
-          </div>
-        )}
-      </>
+      <PublicGate onLogin={() => loadSession(true)} notice={error} />
     );
   if (session.companies.length === 0)
     return (
       <main className="min-h-screen bg-[#f5f6f3] flex items-center justify-center p-6">
         <section className="panel p-8 max-w-lg w-full space-y-5">
-          <div className="text-3xl font-black text-[#153f3b]">VORQ.</div>
+          <LogoMark size={40} title="VORQ" className="text-[#153f3b]" />
           <ShieldCheck className="text-emerald-800" size={32} />
           <h1 className="text-2xl font-semibold">Your account is ready</h1>
           <p className="text-sm text-slate-600">
@@ -332,7 +332,7 @@ export default function ERPApp() {
       >
         <div className="p-7 flex justify-between">
           <div className="flex items-center gap-3">
-            <span className="brand-mark"><Building2 size={22} /></span>
+            <span className="brand-mark"><LogoMark size={22} /></span>
             <span className="text-2xl font-bold text-white tracking-[.12em]">VORQ<span className="text-teal-300">.</span></span>
           </div>
           <button

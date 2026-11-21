@@ -1,6 +1,18 @@
-import { useEffect, useState } from "react";
-import { ShieldCheck, RefreshCw } from "lucide-react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CircleAlert,
+  Copy,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  ShieldCheck,
+} from "lucide-react";
 import { api } from "./api";
+import { Arch, Rose } from "./public/Drawings";
+import { Logo } from "./public/Logo";
 type Captcha = {
   id: string;
   image: string;
@@ -12,8 +24,79 @@ type Pending = {
   qr_image?: string;
   setup_key?: string;
 };
-export function AuthScreen({ onLogin }: { onLogin: () => Promise<void> }) {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+type Mode = "login" | "signup";
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  autoComplete,
+  minLength,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: "current-password" | "new-password";
+  minLength?: number;
+  disabled: boolean;
+}) {
+  const id = useId();
+  const [shown, setShown] = useState(false);
+  return (
+    <div>
+      <label htmlFor={id} className="vq-field">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          className="!pr-12"
+          type={shown ? "text" : "password"}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          autoComplete={autoComplete}
+          required
+          minLength={minLength}
+          maxLength={128}
+          disabled={disabled}
+        />
+        <button
+          type="button"
+          className="vq-icon-btn absolute right-px top-[7px]"
+          aria-label={shown ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+          aria-pressed={shown}
+          disabled={disabled}
+          onClick={() => setShown(!shown)}
+        >
+          {shown ? <EyeOff size={17} /> : <Eye size={17} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="vq-field">
+      {label}
+      {children}
+    </label>
+  );
+}
+
+export function AuthScreen({
+  onLogin,
+  mode = "login",
+  onModeChange,
+  notice,
+}: {
+  onLogin: () => Promise<void>;
+  /** A problem reported by the host app, shown when the form has no error of its own. */
+  notice?: string;
+  mode?: Mode;
+  onModeChange?: (mode: Mode) => void;
+}) {
   const [user, setUser] = useState(""),
     [password, setPassword] = useState(""),
     [confirmation, setConfirmation] = useState(""),
@@ -29,7 +112,28 @@ export function AuthScreen({ onLogin }: { onLogin: () => Promise<void> }) {
     [codes, setCodes] = useState<string[]>([]),
     [recovery, setRecovery] = useState(false),
     [busy, setBusy] = useState(false),
+    [copied, setCopied] = useState(false),
     [error, setError] = useState("");
+  // Navigating between #/signin and #/signup abandons an unfinished verification,
+  // but never the one-time recovery codes: those stay until acknowledged.
+  const firstMode = useRef(true);
+  useEffect(() => {
+    if (firstMode.current) {
+      firstMode.current = false;
+      return;
+    }
+    if (codes.length) return;
+    setPending(null);
+    setCode("");
+    setRecovery(false);
+    setError("");
+    setCaptcha(null);
+    setAnswer("");
+    api<Captcha>("auth_challenge")
+      .then(setCaptcha)
+      .catch((err) => setError(err.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
   useEffect(() => {
     let active = true;
     api<Captcha>("auth_challenge")
@@ -117,344 +221,416 @@ export function AuthScreen({ onLogin }: { onLogin: () => Promise<void> }) {
     }
   }
   const signup = mode === "signup";
+  const enrolling = signup || pending?.stage === "enroll" || codes.length > 0;
+  const steps = enrolling
+    ? ["Details", "Authenticator", "Recovery codes"]
+    : ["Credentials", "Verify"];
+  const current = codes.length ? 2 : pending ? 1 : 0;
+  const heading = codes.length
+    ? "Save your recovery codes"
+    : pending?.stage === "enroll"
+      ? "Set up your authenticator"
+      : pending
+        ? "Verify your sign-in"
+        : signup
+          ? "Create your account"
+          : "Sign in to VORQ";
+  const lede = codes.length
+    ? "Each code works once. Keep them somewhere other than this device — they will not be shown again."
+    : pending?.stage === "enroll"
+      ? "Scan the code with Google Authenticator, Microsoft Authenticator or another TOTP app, then enter the current code."
+      : pending
+        ? "Enter the current code from your authenticator app."
+        : signup
+          ? "Request your role. Your administrator confirms your access."
+          : "One account for VORQ on web and mobile.";
+
   return (
-    <main className="auth-screen min-h-screen px-5 py-10">
-      <form
-        className="auth-card mx-auto max-w-md space-y-5 rounded-2xl border border-slate-200 bg-white p-7"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void submit();
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <img
-            src="/assets/vorq-logo.svg"
-            alt="VORQ logo"
-            className="h-12 w-16 object-contain"
-          />
-          <span className="text-xl font-bold tracking-widest">VORQ</span>
+    <div className="vq-public lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <aside className="vq-on-night relative hidden h-screen flex-col justify-between overflow-hidden bg-vq-night p-12 text-vq-bone lg:sticky lg:top-0 lg:flex xl:p-16">
+        <div className="vq-backdrop -right-24 -top-24 w-[340px]">
+          <Rose className="vq-turn" />
         </div>
-        <div>
-          <h1 className="text-2xl font-semibold">
-            {codes.length
-              ? "Save recovery codes"
-              : pending?.stage === "enroll"
-                ? "Set up your authenticator"
-                : pending
-                  ? "Verify your sign-in"
-                  : signup
-                    ? "Create your account"
-                    : "Sign in to VORQ"}
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            One account for VORQ mobile and desktop.
+        <a href="#/" aria-label="VORQ home" className="relative w-fit">
+          <Logo size={30} />
+        </a>
+        <div className="vq-fine relative mx-auto w-full max-w-[360px] text-vq-brass-light/70">
+          <Arch />
+        </div>
+        <div className="relative">
+          <p className="vq-display text-[2.75rem] xl:text-5xl">
+            Measure twice. <em>Bill once.</em>
+          </p>
+          <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-vq-ash">
+            Estimates, procurement, stores, labour, subcontracts and billing —
+            one measured record of the job.
           </p>
         </div>
-        {codes.length ? (
-          <>
-            <p className="text-sm text-slate-600">
-              Each code works once. Save these outside this device; they will
-              not be shown again.
-            </p>
-            <div className="grid gap-2 rounded-lg bg-slate-50 p-4 font-mono text-sm">
-              {codes.map((value) => (
-                <code key={value}>{value}</code>
-              ))}
-            </div>
-            <button className="primary w-full justify-center" disabled={busy}>
-              I saved these codes — continue
-            </button>
-          </>
-        ) : pending ? (
-          <>
-            {pending.stage === "enroll" ? (
-              <>
-                <p className="text-sm text-slate-600">
-                  Scan with Google Authenticator, Microsoft Authenticator or
-                  another TOTP app. Then enter a current code to enable
-                  verification.
-                </p>
-                <img
-                  src={pending.qr_image}
-                  alt="Authenticator setup QR code"
-                  className="mx-auto h-64 w-64"
-                />
-                <p className="text-xs text-slate-500">
-                  Can’t scan? Enter this setup key:
-                </p>
-                <code className="block break-all rounded-lg bg-slate-50 p-3 text-sm">
-                  {pending.setup_key}
-                </code>
-                <p className="text-xs text-slate-500">
-                  Setup expires after 5 minutes.
-                </p>
-              </>
-            ) : null}
-            <label className="block text-sm font-medium">
-              {recovery ? "Recovery code" : "6-digit authenticator code"}
-              <input
-                className="mt-2"
-                autoComplete="one-time-code"
-                inputMode={recovery ? "text" : "numeric"}
-                value={code}
-                maxLength={40}
-                onChange={(event) => setCode(event.target.value)}
-                required
-                disabled={busy}
-              />
-            </label>
-            {pending.stage === "totp" ? (
-              <button
-                type="button"
-                className="secondary"
-                disabled={busy}
-                onClick={() => {
-                  setRecovery(!recovery);
-                  setCode("");
-                }}
+      </aside>
+
+      <main className="flex min-h-screen flex-col px-5 pb-10 pt-5 sm:px-10">
+        <div className="flex items-center justify-between">
+          <a href="#/" aria-label="VORQ home" className="lg:invisible">
+            <Logo size={26} />
+          </a>
+          <a
+            href="#/"
+            className="vq-link inline-flex min-h-[44px] items-center gap-2 text-[13px] font-medium text-vq-soft"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            Back to home
+          </a>
+        </div>
+
+        <form
+          className="vq-form mx-auto my-auto w-full max-w-[440px] py-10"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
+          <ol className="vq-steps" aria-label="Progress">
+            {steps.map((label, index) => (
+              <li
+                key={label}
+                aria-current={index === current ? "step" : undefined}
+                className={index < current ? "is-done" : undefined}
               >
-                {recovery ? "Use authenticator instead" : "Use a recovery code"}
-              </button>
-            ) : null}
-            <button className="primary w-full justify-center" disabled={busy}>
-              {busy
-                ? "Verifying…"
-                : pending.stage === "enroll"
-                  ? "Confirm and enable TOTP"
-                  : "Verify and sign in"}
-            </button>
-            <button
-              type="button"
-              className="secondary"
-              disabled={busy}
-              onClick={() => {
-                setPending(null);
-                setCode("");
-                setRecovery(false);
-                setError("");
-                void newCaptcha().catch((err) => setError(err.message));
-              }}
-            >
-              Start again
-            </button>
-          </>
-        ) : (
-          <>
-            <div
-              role="tablist"
-              aria-label="Account access"
-              className="flex rounded-lg bg-slate-100 p-1"
-            >
-              {(["login", "signup"] as const).map((value) => (
+                <span>
+                  {index < current ? (
+                    <Check size={13} strokeWidth={2.5} aria-label="Done:" className="-mt-0.5 mr-1 inline" />
+                  ) : (
+                    `${index + 1}. `
+                  )}
+                  <span className={index === current ? "" : "hidden sm:inline"}>
+                    {label}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <h1 className="vq-display mt-6 text-[2.6rem] sm:text-5xl">{heading}</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-vq-soft">{lede}</p>
+
+          <div
+            key={codes.length ? "codes" : pending ? pending.stage : "form"}
+            className="vq-swap mt-8 space-y-5"
+          >
+            {codes.length ? (
+              <>
+                <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5 rounded-md border border-vq-line bg-vq-card p-5 font-mono text-[15px] tracking-wide">
+                  {codes.map((value) => (
+                    <li key={value}>
+                      <code>{value}</code>
+                    </li>
+                  ))}
+                </ul>
                 <button
-                  key={value}
                   type="button"
-                  role="tab"
-                  aria-selected={mode === value}
-                  disabled={busy}
-                  className={`flex-1 rounded-md px-3 py-2 text-sm ${mode === value ? "bg-white font-semibold shadow-sm" : ""}`}
-                  onClick={() => {
-                    setMode(value);
-                    setPassword("");
-                    setConfirmation("");
-                    setError("");
+                  className="vq-btn-ghost w-full"
+                  onClick={async () => {
+                    try {
+                      // Absent outside secure contexts, so this can throw as well as reject.
+                      await navigator.clipboard.writeText(codes.join("\n"));
+                      setCopied(true);
+                    } catch {
+                      setError("Could not copy. Select the codes and copy them manually.");
+                    }
                   }}
                 >
-                  {value === "login" ? "Sign in" : "Create account"}
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  <span aria-live="polite">
+                    {copied ? "Copied to clipboard" : "Copy all codes"}
+                  </span>
                 </button>
-              ))}
-            </div>
-            {signup ? (
-              <>
-                <label className="block text-sm font-medium">
-                  Full name
-                  <input
-                    className="mt-2"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    autoComplete="name"
-                    required
-                    maxLength={100}
-                    disabled={busy}
-                  />
-                </label>
-                <label className="block text-sm font-medium">
-                  Email address
-                  <input
-                    className="mt-2"
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    autoComplete="email"
-                    required
-                    maxLength={140}
-                    disabled={busy}
-                  />
-                </label>
+                <button className="vq-btn w-full" disabled={busy}>
+                  {busy ? "Opening your workspace…" : "I have saved these codes"}
+                  {busy ? null : <ArrowRight size={16} className="vq-nudge" />}
+                </button>
               </>
-            ) : null}
-            <label className="block text-sm font-medium">
-              {signup ? "Username" : "Email or username"}
-              <input
-                className="mt-2"
-                value={user}
-                onChange={(event) => setUser(event.target.value)}
-                autoComplete="username"
-                required
-                maxLength={signup ? 40 : 140}
-                disabled={busy}
-              />
-            </label>
-            <label className="block text-sm font-medium">
-              Password
-              <input
-                className="mt-2"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete={signup ? "new-password" : "current-password"}
-                required
-                minLength={signup ? 12 : undefined}
-                maxLength={128}
-                disabled={busy}
-              />
-            </label>
-            {signup ? (
+            ) : pending ? (
               <>
-                <p className="text-xs text-slate-500">
-                  Use a unique passphrase of 12–128 characters. Predictable
-                  passwords are rejected.
-                </p>
-                <label className="block text-sm font-medium">
-                  Confirm password
+                {pending.stage === "enroll" ? (
+                  <div className="rounded-md border border-vq-line bg-vq-card p-5">
+                    <img
+                      src={pending.qr_image}
+                      alt="Authenticator setup QR code"
+                      className="mx-auto h-52 w-52 rounded bg-white p-2"
+                    />
+                    <p className="vq-hint mt-4">Can’t scan? Enter this setup key:</p>
+                    <code className="mt-1.5 block break-all rounded border border-vq-line bg-white px-3 py-2.5 text-[13px] tracking-wide">
+                      {pending.setup_key}
+                    </code>
+                    <p className="vq-hint mt-3">Setup expires after 5 minutes.</p>
+                  </div>
+                ) : null}
+                <Field label={recovery ? "Recovery code" : "6-digit authenticator code"}>
                   <input
-                    className="mt-2"
-                    type="password"
-                    value={confirmation}
-                    onChange={(event) => setConfirmation(event.target.value)}
-                    autoComplete="new-password"
+                    className={`vq-code-input ${recovery ? "is-recovery" : ""}`}
+                    autoComplete="one-time-code"
+                    autoFocus
+                    inputMode={recovery ? "text" : "numeric"}
+                    value={code}
+                    maxLength={40}
+                    onChange={(event) => setCode(event.target.value)}
                     required
-                    maxLength={128}
                     disabled={busy}
                   />
-                </label>
-                <label className="block text-sm font-medium">
-                  Company / organisation
-                  <input
-                    className="mt-2"
-                    value={company}
-                    onChange={(event) => setCompany(event.target.value)}
-                    required
-                    maxLength={140}
+                </Field>
+                <button className="vq-btn w-full" disabled={busy}>
+                  {busy
+                    ? "Verifying…"
+                    : pending.stage === "enroll"
+                      ? "Confirm and enable verification"
+                      : "Verify and sign in"}
+                  {busy ? null : <ArrowRight size={16} className="vq-nudge" />}
+                </button>
+                <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 text-[13px] font-medium text-vq-soft">
+                  {pending.stage === "totp" ? (
+                    <button
+                      type="button"
+                      className="vq-link min-h-[44px]"
+                      disabled={busy}
+                      onClick={() => {
+                        setRecovery(!recovery);
+                        setCode("");
+                      }}
+                    >
+                      {recovery ? "Use authenticator instead" : "Use a recovery code"}
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="vq-link min-h-[44px]"
                     disabled={busy}
-                  />
-                </label>
-                <label className="block text-sm font-medium">
-                  Requested role
-                  <select
-                    className="mt-2"
-                    required
-                    value={role}
-                    disabled={busy}
-                    onChange={(event) => {
-                      setRole(event.target.value);
-                      setDetails({});
+                    onClick={() => {
+                      setPending(null);
+                      setCode("");
+                      setRecovery(false);
+                      setError("");
+                      void newCaptcha().catch((err) => setError(err.message));
                     }}
                   >
-                    <option value="">Choose your role</option>
-                    {Object.keys(captcha?.roles || {}).map((value) => (
-                      <option key={value}>{value}</option>
-                    ))}
-                  </select>
-                </label>
-                {(captcha?.roles[role] || []).map((field) => (
-                  <label key={field.name} className="block text-sm font-medium">
-                    {field.label}
-                    <input
-                      className="mt-2"
-                      value={details[field.name] || ""}
-                      onChange={(event) =>
-                        setDetails((current) => ({
-                          ...current,
-                          [field.name]: event.target.value,
-                        }))
-                      }
-                      required
-                      maxLength={200}
-                      disabled={busy}
-                    />
-                  </label>
-                ))}
-                <p className="text-xs leading-relaxed text-slate-500">
-                  A role request never grants access. Your administrator must
-                  verify your identity and assign company, project and ERP
-                  permissions.
-                </p>
+                    Start again
+                  </button>
+                </div>
               </>
-            ) : null}
-            <div className="space-y-3 rounded-lg border p-4">
-              <span className="text-sm font-medium">Security image</span>
-              {captcha ? (
-                <img
-                  src={captcha.image}
-                  alt="Security image: enter the six displayed characters"
-                  className="h-24 w-full object-contain"
-                />
-              ) : (
-                <p className="text-sm text-slate-500">
-                  Loading security image…
-                </p>
-              )}
-              <button
-                type="button"
-                className="secondary"
-                disabled={busy}
-                onClick={() => {
-                  void newCaptcha().catch((err) => setError(err.message));
-                }}
-              >
-                <RefreshCw size={15} />
-                Refresh image
-              </button>
-              <label className="block text-sm font-medium">
-                Characters from image
-                <input
-                  className="mt-2"
-                  value={answer}
-                  onChange={(event) => setAnswer(event.target.value)}
-                  autoComplete="off"
-                  required
-                  maxLength={6}
-                  disabled={busy}
-                />
-              </label>
-              <p className="text-xs text-slate-500">
-                Expires after 2 minutes. Single use.
-              </p>
-            </div>
-            <button
-              className="primary w-full justify-center"
-              disabled={busy || !captcha}
-            >
-              {busy
-                ? "Please wait…"
-                : signup
-                  ? "Create account and set up TOTP"
-                  : "Continue to authenticator"}
-            </button>
-          </>
-        )}
-        {error ? (
-          <p role="alert" className="error">
-            {error}
+            ) : (
+              <>
+                <div role="tablist" aria-label="Account access" className="vq-tabs">
+                  {(["login", "signup"] as const).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      role="tab"
+                      aria-selected={mode === value}
+                      disabled={busy}
+                      onClick={() => {
+                        if (mode === value) return;
+                        onModeChange?.(value);
+                        setPassword("");
+                        setConfirmation("");
+                        setError("");
+                      }}
+                    >
+                      {value === "login" ? "Sign in" : "Create account"}
+                    </button>
+                  ))}
+                </div>
+                {signup ? (
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Field label="Full name">
+                      <input
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                        autoComplete="name"
+                        required
+                        maxLength={100}
+                        disabled={busy}
+                      />
+                    </Field>
+                    <Field label="Email address">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        autoComplete="email"
+                        required
+                        maxLength={140}
+                        disabled={busy}
+                      />
+                    </Field>
+                  </div>
+                ) : null}
+                <Field label={signup ? "Username" : "Email or username"}>
+                  <input
+                    value={user}
+                    onChange={(event) => setUser(event.target.value)}
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    required
+                    maxLength={signup ? 40 : 140}
+                    disabled={busy}
+                  />
+                </Field>
+                {signup ? (
+                  <>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <PasswordField
+                        label="Password"
+                        value={password}
+                        onChange={setPassword}
+                        autoComplete="new-password"
+                        minLength={12}
+                        disabled={busy}
+                      />
+                      <PasswordField
+                        label="Confirm password"
+                        value={confirmation}
+                        onChange={setConfirmation}
+                        autoComplete="new-password"
+                        disabled={busy}
+                      />
+                    </div>
+                    <p className="vq-hint !mt-2">
+                      Use a unique passphrase of 12–128 characters. Predictable
+                      passwords are rejected.
+                    </p>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <Field label="Company / organisation">
+                        <input
+                          value={company}
+                          onChange={(event) => setCompany(event.target.value)}
+                          autoComplete="organization"
+                          required
+                          maxLength={140}
+                          disabled={busy}
+                        />
+                      </Field>
+                      <Field label="Requested role">
+                        <select
+                          required
+                          value={role}
+                          disabled={busy}
+                          onChange={(event) => {
+                            setRole(event.target.value);
+                            setDetails({});
+                          }}
+                        >
+                          <option value="">Choose your role</option>
+                          {Object.keys(captcha?.roles || {}).map((value) => (
+                            <option key={value}>{value}</option>
+                          ))}
+                        </select>
+                      </Field>
+                    </div>
+                    {(captcha?.roles[role] || []).map((field) => (
+                      <Field key={field.name} label={field.label}>
+                        <input
+                          value={details[field.name] || ""}
+                          onChange={(event) =>
+                            setDetails((current) => ({
+                              ...current,
+                              [field.name]: event.target.value,
+                            }))
+                          }
+                          required
+                          maxLength={200}
+                          disabled={busy}
+                        />
+                      </Field>
+                    ))}
+                    <p className="vq-hint !mt-2">
+                      A role request never grants access. Your administrator
+                      must verify your identity and assign company, project and
+                      ERP permissions.
+                    </p>
+                  </>
+                ) : (
+                  <PasswordField
+                    label="Password"
+                    value={password}
+                    onChange={setPassword}
+                    autoComplete="current-password"
+                    disabled={busy}
+                  />
+                )}
+                <fieldset className="rounded-md border border-vq-line bg-vq-card px-4 pb-4 pt-2">
+                  <legend className="px-1.5 text-[13px] font-medium text-vq-soft">
+                    Security check
+                  </legend>
+                  <div className="flex items-center gap-2">
+                    <div className="grid h-20 flex-1 place-items-center overflow-hidden rounded border border-vq-line bg-white">
+                      {captcha ? (
+                        <img
+                          src={captcha.image}
+                          alt="Security image: enter the six displayed characters"
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <span className="vq-hint" role="status">
+                          Loading security image…
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="vq-icon-btn"
+                      aria-label="Load a new security image"
+                      title="New image"
+                      disabled={busy}
+                      onClick={() => {
+                        void newCaptcha().catch((err) => setError(err.message));
+                      }}
+                    >
+                      <RefreshCw size={17} />
+                    </button>
+                  </div>
+                  <div className="mt-3">
+                    <Field label="Characters shown above">
+                      <input
+                        className="font-mono !tracking-[0.25em]"
+                        value={answer}
+                        onChange={(event) => setAnswer(event.target.value)}
+                        autoComplete="off"
+                        autoCapitalize="none"
+                        spellCheck={false}
+                        required
+                        maxLength={6}
+                        disabled={busy}
+                      />
+                    </Field>
+                  </div>
+                  <p className="vq-hint mt-2">
+                    Single use. Expires after 2 minutes.
+                  </p>
+                </fieldset>
+                <button className="vq-btn w-full" disabled={busy || !captcha}>
+                  {busy
+                    ? "Please wait…"
+                    : signup
+                      ? "Create account"
+                      : "Continue to authenticator"}
+                  {busy ? null : <ArrowRight size={16} className="vq-nudge" />}
+                </button>
+              </>
+            )}
+          </div>
+
+          {error || notice ? (
+            <p role="alert" className="vq-alert mt-5">
+              <CircleAlert size={17} className="mt-px shrink-0" aria-hidden="true" />
+              <span>{error || notice}</span>
+            </p>
+          ) : null}
+          <p className="vq-hint mt-8 flex gap-2.5 border-t border-vq-line pt-5">
+            <ShieldCheck size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+            Password, security image and authenticator verification protect
+            your VORQ session.
           </p>
-        ) : null}
-        <p className="flex gap-2 text-xs leading-relaxed text-slate-500">
-          <ShieldCheck size={18} className="shrink-0" />
-          Password, security image and authenticator verification protect your
-          VORQ session.
-        </p>
-      </form>
-    </main>
+        </form>
+      </main>
+    </div>
   );
 }

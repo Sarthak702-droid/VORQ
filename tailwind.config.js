@@ -7,6 +7,21 @@ export default {
   theme: {
     extend: {
       colors: {
+        vq: {
+          paper: '#F5F0E6',
+          vellum: '#EDE6D6',
+          card: '#FBF8F1',
+          ink: '#1A1814',
+          soft: '#4A453C',
+          muted: '#6B6558',
+          line: '#D9CFBB',
+          brass: '#A9803F',
+          'brass-deep': '#7A5A22',
+          'brass-light': '#CDA863',
+          night: '#15130E',
+          bone: '#EFE8D8',
+          ash: '#A79F8E',
+        },
         vorq: {
           ink: '#111827',
           slate: '#475569',
@@ -50,6 +65,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Cormorant Garamond"', 'Cormorant', 'Georgia', 'serif'],
       }
     },
   },
