@@ -8,19 +8,17 @@ export default {
     extend: {
       colors: {
         vq: {
-          paper: '#F5F0E6',
-          vellum: '#EDE6D6',
-          card: '#FBF8F1',
-          ink: '#1A1814',
-          soft: '#4A453C',
-          muted: '#6B6558',
-          line: '#D9CFBB',
-          brass: '#A9803F',
-          'brass-deep': '#7A5A22',
-          'brass-light': '#CDA863',
+          paper: '#F3EEE2',
+          vellum: '#EAE3D2',
+          card: '#FAF6EC',
+          ink: '#1B1915',
+          soft: '#4A463D',
+          muted: '#6A6558',
+          line: '#D6CDB9',
+          red: '#9B3A22',
           night: '#15130E',
-          bone: '#EFE8D8',
-          ash: '#A79F8E',
+          bone: '#F3EEE2',
+          ash: '#B4AD9D',
         },
         vorq: {
           ink: '#111827',
@@ -65,7 +63,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['"Cormorant Garamond"', 'Cormorant', 'Georgia', 'serif'],
+        display: ['"Libre Caslon Display"', '"Libre Caslon Text"', 'Georgia', 'serif'],
       }
     },
   },

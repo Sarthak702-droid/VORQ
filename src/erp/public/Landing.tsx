@@ -1,142 +1,67 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import {
-  ArrowRight,
-  Image as ImageIcon,
-  KeyRound,
-  LifeBuoy,
-  ShieldCheck,
-  UserCheck,
-} from "lucide-react";
-import {
-  Arch,
-  Dividers,
-  Elevation,
-  Plan,
-  Rose,
-  Seal,
-  Section,
-  Stair,
-  Truss,
-  useInView,
-} from "./Drawings";
+import { ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
+import { Plate } from "./Plate";
+import { useInView } from "./useInView";
 
 const SIGN_IN = "#/signin";
 const SIGN_UP = "#/signup";
 
-const plates = [
-  {
-    numeral: "I",
-    title: "Estimates & BOQ",
-    body: "Bills of quantities and budgets that every later document is measured against.",
-    Art: Plan,
-  },
-  {
-    numeral: "II",
-    title: "Procurement",
-    body: "Requests, purchase orders and receipts, tied to the project and the budget line they consume.",
-    Art: Dividers,
-  },
-  {
-    numeral: "III",
-    title: "Stores & materials",
-    body: "Stock received, issued and held at each site, so material on paper matches material on the ground.",
-    Art: Section,
-  },
-  {
-    numeral: "IV",
-    title: "Site & labour",
-    body: "Daily site reports and labour attendance, entered from the phone where the work actually happens.",
-    Art: Truss,
-  },
-  {
-    numeral: "V",
-    title: "Subcontracts",
-    body: "Work orders and progress for every trade, measured before anything is paid.",
-    Art: Arch,
-  },
-  {
-    numeral: "VI",
-    title: "Billing & finance",
-    body: "Approvals, bills and payments, with tax and posting rules enforced on the server rather than in a spreadsheet.",
-    Art: Seal,
-  },
+const contents = [
+  ["Estimates and BOQ", "Quantities, rates and the budget for each project."],
+  [
+    "Purchasing",
+    "Material requests, purchase orders, and what the supplier actually delivered.",
+  ],
+  ["Stores", "Stock received, issued and lying at each site."],
+  ["Site reports", "What was done today, entered from the phone on site."],
+  ["Labour", "Daily attendance, site by site."],
+  ["Subcontracts", "Work orders and the progress against each one."],
+  [
+    "Billing and accounts",
+    "Client bills, payments and approvals. Tax and ledger posting are done on the server by ERPNext.",
+  ],
 ];
 
-const stages = [
-  {
-    title: "Estimate",
-    body: "Set out the BOQ and the budget. This becomes the datum for the whole job.",
-  },
-  {
-    title: "Procure",
-    body: "Order against the estimate. Receive into stores and issue to site.",
-  },
-  {
-    title: "Build",
-    body: "Record each day on site: progress, labour, materials and subcontract work.",
-  },
-  {
-    title: "Certify & bill",
-    body: "Approve what was measured, raise the bill and post it to the accounts.",
-  },
+// One BOQ line followed through the system. Figures are invented but consistent:
+// 184 cum at ₹6,450; about 500 bricks per cum at ₹9 each.
+const ledger = [
+  ["Estimate", "BOQ item 4.2, brick masonry 230 mm", "184.00 cum", "₹11,86,800"],
+  ["Purchasing", "Purchase order to the brick supplier", "92,000 nos", "₹8,28,000"],
+  ["Stores", "Received at the site store so far", "30,000 nos", ""],
+  ["Site report", "Masonry completed to date", "62.50 cum", ""],
+  ["Billing", "Included in running bill no. 3", "48.00 cum", "₹3,09,600"],
 ];
 
 const roles = [
-  ["Owner", "The position across every company and project."],
-  ["Project Manager", "Programme, cost and approvals for assigned projects."],
-  ["Quantity Surveyor", "Quantities, measurements and certification."],
-  ["Site Engineer", "Daily reports, labour and progress from site."],
-  ["Storekeeper", "Receipts, issues and stock on hand."],
-  ["Procurement Officer", "Requests, orders and suppliers."],
-  ["Accountant", "Bills, payments and the ledger."],
-  ["Subcontractor", "Work orders and bills for their own trade."],
-];
-
-const safeguards = [
-  {
-    Icon: KeyRound,
-    title: "Authenticator on every sign-in",
-    body: "A password alone never opens a workspace. Each sign-in is confirmed with a code from your authenticator app.",
-  },
-  {
-    Icon: UserCheck,
-    title: "Access is assigned, not assumed",
-    body: "Creating an account grants nothing. An administrator verifies each person and assigns their company, projects and role.",
-  },
-  {
-    Icon: LifeBuoy,
-    title: "One-use recovery codes",
-    body: "Lose the phone, keep the account. Recovery codes are issued once at enrolment and each works a single time.",
-  },
-  {
-    Icon: ImageIcon,
-    title: "Guarded front door",
-    body: "A single-use security image, rate limits and revocable server-side sessions stand between the internet and your books.",
-  },
+  "Owner",
+  "Project Manager",
+  "Quantity Surveyor",
+  "Site Engineer",
+  "Storekeeper",
+  "Procurement Officer",
+  "Accountant",
+  "Subcontractor",
 ];
 
 function Reveal({
   children,
   delay = 0,
   className = "",
-  as: Tag = "div",
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
-  as?: "div" | "li" | "article";
 }) {
-  const [ref, seen] = useInView<HTMLElement>(0.15);
+  const [ref, seen] = useInView<HTMLDivElement>(0.15);
   return (
-    <Tag
-      // The three allowed tags all accept an HTMLElement ref.
-      ref={ref as never}
+    <div
+      ref={ref}
       className={`vq-reveal ${seen ? "is-in" : ""} ${className}`}
       style={{ "--delay": `${delay}ms` } as CSSProperties}
     >
       {children}
-    </Tag>
+    </div>
   );
 }
 
@@ -151,7 +76,7 @@ export function Landing() {
   const root = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
 
-  // One passive scroll listener drives the sticky nav and the backdrop drift.
+  // One passive scroll listener drives the sticky nav and the background drift.
   useEffect(() => {
     let frame = 0;
     const update = () => {
@@ -170,7 +95,7 @@ export function Landing() {
     };
   }, []);
 
-  const [stagesRef, stagesSeen] = useInView<HTMLDivElement>(0.3);
+  const [ledgerRef, ledgerSeen] = useInView<HTMLDivElement>(0.25);
 
   return (
     <div ref={root} className="vq-public overflow-x-clip">
@@ -188,17 +113,16 @@ export function Landing() {
       <header className={`vq-nav ${stuck ? "is-stuck" : ""}`}>
         <nav
           aria-label="Primary"
-          className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8"
+          className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-5 sm:px-8"
         >
-          <a href="#/" aria-label="VORQ home" className="text-vq-ink">
-            <Logo size={28} />
+          <a href="#/" aria-label="VORQ home">
+            <Logo size={26} />
           </a>
-          <div className="hidden items-center gap-9 text-sm text-vq-soft md:flex">
+          <div className="hidden items-center gap-8 text-[15px] text-vq-soft md:flex">
             {[
-              ["platform", "Platform"],
-              ["method", "Method"],
-              ["roles", "Roles"],
-              ["security", "Security"],
+              ["covers", "What it covers"],
+              ["example", "Worked example"],
+              ["access", "Access"],
             ].map(([id, label]) => (
               <button
                 key={id}
@@ -213,13 +137,13 @@ export function Landing() {
           <div className="flex items-center gap-2 sm:gap-5">
             <a
               href={SIGN_IN}
-              className="vq-link whitespace-nowrap px-2 py-3 text-sm font-medium max-[379px]:hidden"
+              className="vq-link whitespace-nowrap px-2 py-3 text-[15px] font-medium max-[379px]:hidden"
             >
               Sign in
             </a>
             <a
               href={SIGN_UP}
-              className="vq-btn !min-h-[42px] whitespace-nowrap !px-4 sm:!px-5"
+              className="vq-btn !min-h-[42px] whitespace-nowrap !px-4"
             >
               Create account
             </a>
@@ -228,278 +152,29 @@ export function Landing() {
       </header>
 
       <main id="main" tabIndex={-1} className="outline-none">
-        {/* ---------- Hero ---------- */}
-        <section className="relative">
-          <div
-            className="vq-backdrop vq-drift -right-24 -top-10 hidden w-[380px] lg:block"
-            style={{ "--k": 0.08 } as CSSProperties}
-          >
-            <Rose className="vq-turn" />
-          </div>
-          <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-16 pt-10 sm:px-8 sm:pt-16 lg:grid-cols-12 lg:gap-6 lg:pb-24 lg:pt-20">
-            <div className="lg:col-span-5">
-              <p className="vq-eyebrow vq-rise">
-                Construction operations &amp; financial control
-              </p>
-              <h1
-                className="vq-display vq-rise mt-6 text-[2.9rem] sm:text-6xl xl:text-[4.5rem]"
-                style={{ "--delay": "120ms" } as CSSProperties}
-              >
-                Every site, drawn to scale.{" "}
-                <em>Every rupee, accounted for.</em>
-              </h1>
-              <p
-                className="vq-rise mt-7 max-w-[30rem] text-[17px] leading-relaxed text-vq-soft"
-                style={{ "--delay": "240ms" } as CSSProperties}
-              >
-                VORQ gives residential contractors one measured record of the
-                job — estimates, procurement, stores, labour, subcontracts and
-                billing — shared by the office and the site.
-              </p>
-              <div
-                className="vq-rise mt-9 flex flex-wrap gap-3"
-                style={{ "--delay": "360ms" } as CSSProperties}
-              >
-                <a href={SIGN_UP} className="vq-btn">
-                  Create account
-                  <ArrowRight size={16} className="vq-nudge" aria-hidden="true" />
-                </a>
-                <a href={SIGN_IN} className="vq-btn-ghost">
-                  Sign in
-                </a>
-              </div>
-              <p
-                className="vq-rise mt-6 flex items-center gap-2 text-[13px] text-vq-muted"
-                style={{ "--delay": "480ms" } as CSSProperties}
-              >
-                <ShieldCheck size={15} aria-hidden="true" />
-                One account for web and mobile, protected by two-step sign-in.
-              </p>
-            </div>
-            <div
-              className="vq-drift text-vq-ink lg:col-span-7 lg:-mr-6"
-              style={{ "--k": -0.03, "--vq-lag": "350ms" } as CSSProperties}
+        {/* ---------- Opening ---------- */}
+        <section className="mx-auto grid max-w-6xl gap-12 px-5 pb-20 pt-10 sm:px-8 sm:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20">
+          <div className="lg:col-span-7 lg:self-center lg:pr-6">
+            <p className="vq-label vq-rise">For residential contractors</p>
+            <h1
+              className="vq-display vq-rise mt-5 text-[2.9rem] sm:text-6xl lg:text-[4.6rem]"
+              style={{ "--delay": "100ms" } as CSSProperties}
             >
-              <Elevation />
-            </div>
-          </div>
-
-          <div className="mx-auto max-w-7xl px-5 pb-20 sm:px-8 lg:pb-28">
-            <Reveal>
-              <dl className="vq-titleblock">
-                <div>
-                  <dt>Clients</dt>
-                  <dd>Web &amp; mobile</dd>
-                </div>
-                <div>
-                  <dt>Access</dt>
-                  <dd>Role-aware, per project</dd>
-                </div>
-                <div>
-                  <dt>Sign-in</dt>
-                  <dd>Password + authenticator</dd>
-                </div>
-                <div>
-                  <dt>Accounts</dt>
-                  <dd>Built on ERPNext</dd>
-                </div>
-              </dl>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* ---------- Platform ---------- */}
-        <section
-          id="platform"
-          className="relative scroll-mt-20 border-t border-vq-line py-20 lg:py-32"
-        >
-          <div
-            className="vq-backdrop vq-drift -left-20 top-24 hidden w-[300px] lg:block"
-            style={{ "--k": -0.05 } as CSSProperties}
-          >
-            <Stair />
-          </div>
-          <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-            <Reveal className="max-w-2xl">
-              <p className="vq-eyebrow">The platform</p>
-              <h2 className="vq-display mt-5 text-4xl sm:text-5xl lg:text-6xl">
-                Six plates. <em>One set of books.</em>
-              </h2>
-              <p className="mt-6 text-[17px] leading-relaxed text-vq-soft">
-                Each part of the job is a sheet in the same drawing set. Change
-                a quantity on one, and the others already know.
-              </p>
-            </Reveal>
-            <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {plates.map(({ numeral, title, body, Art }, index) => (
-                <Reveal as="li" key={title} delay={(index % 3) * 110}>
-                  <article className="vq-plate h-full">
-                    <div className="flex items-start justify-between">
-                      <Art className="vq-plate-art" />
-                      <span className="font-display text-lg italic text-vq-brass-deep">
-                        Plate {numeral}
-                      </span>
-                    </div>
-                    <h3 className="mt-8 font-display text-[28px] font-semibold leading-tight">
-                      {title}
-                    </h3>
-                    <p className="mt-3 text-[15px] leading-relaxed text-vq-soft">
-                      {body}
-                    </p>
-                  </article>
-                </Reveal>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* ---------- Method ---------- */}
-        <section
-          id="method"
-          className="scroll-mt-20 border-t border-vq-line bg-vq-vellum/60 py-20 lg:py-32"
-        >
-          <div className="mx-auto max-w-7xl px-5 sm:px-8">
-            <Reveal className="max-w-2xl">
-              <p className="vq-eyebrow">The method</p>
-              <h2 className="vq-display mt-5 text-4xl sm:text-5xl lg:text-6xl">
-                From first line <em>to final bill.</em>
-              </h2>
-            </Reveal>
-            <div
-              ref={stagesRef}
-              className={`mt-16 ${stagesSeen ? "is-in" : ""}`}
+              BOQ to final bill, on one record.
+            </h1>
+            <p
+              className="vq-prose vq-rise mt-7 max-w-[34rem]"
+              style={{ "--delay": "220ms" } as CSSProperties}
             >
-              <div className="vq-rule hidden lg:block" />
-              <ol className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-                {stages.map((stage, index) => (
-                  <Reveal as="li" key={stage.title} delay={index * 160}>
-                    <div className="relative border-t border-vq-ink pt-7 lg:border-t-0">
-                      <span
-                        aria-hidden="true"
-                        className="absolute -top-[5px] left-0 h-[9px] w-[9px] rotate-45 bg-vq-brass"
-                      />
-                      <p className="font-display text-lg italic text-vq-brass-deep">
-                        {["i.", "ii.", "iii.", "iv."][index]}
-                      </p>
-                      <h3 className="mt-2 font-display text-[30px] font-semibold leading-tight">
-                        {stage.title}
-                      </h3>
-                      <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-vq-soft">
-                        {stage.body}
-                      </p>
-                    </div>
-                  </Reveal>
-                ))}
-              </ol>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------- Roles ---------- */}
-        <section
-          id="roles"
-          className="relative scroll-mt-20 border-t border-vq-line py-20 lg:py-32"
-        >
-          <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-12">
-            <Reveal className="lg:col-span-4">
-              <p className="vq-eyebrow">The readers</p>
-              <h2 className="vq-display mt-5 text-4xl sm:text-5xl">
-                One record, <em>read eight ways.</em>
-              </h2>
-              <p className="mt-6 text-[17px] leading-relaxed text-vq-soft">
-                Everyone works from the same job record, and each person sees
-                the part that is theirs to see. Roles are assigned by your
-                administrator, company by company and project by project.
-              </p>
-              <div className="mt-10 hidden w-44 text-vq-soft lg:block">
-                <Dividers />
-              </div>
-            </Reveal>
-            <ol className="vq-roles lg:col-span-7 lg:col-start-6">
-              {roles.map(([role, scope], index) => (
-                <Reveal as="li" key={role} delay={index * 60}>
-                  <span className="font-display text-lg italic text-vq-brass-deep">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="font-display text-2xl font-semibold leading-tight">
-                    {role}
-                  </span>
-                  <span className="col-start-2 text-[15px] text-vq-soft sm:col-start-3">
-                    {scope}
-                  </span>
-                </Reveal>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* ---------- Security ---------- */}
-        <section
-          id="security"
-          className="vq-on-night relative scroll-mt-20 overflow-hidden bg-vq-night py-20 text-vq-bone lg:py-32"
-        >
-          <div
-            className="vq-backdrop vq-drift -right-16 top-10 w-[420px] max-w-[70vw]"
-            style={{ "--k": -0.04 } as CSSProperties}
-          >
-            <Arch />
-          </div>
-          <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-            <Reveal className="max-w-2xl">
-              <p className="vq-eyebrow">Security</p>
-              <h2 className="vq-display mt-5 text-4xl sm:text-5xl lg:text-6xl">
-                Kept like the accounts <em>they are.</em>
-              </h2>
-              <p className="mt-6 text-[17px] leading-relaxed text-vq-ash">
-                Project money deserves more than a password. Sign-in on VORQ is
-                deliberate, and access is granted by a person who knows you.
-              </p>
-            </Reveal>
-            <ul className="mt-14 grid gap-x-12 gap-y-10 sm:grid-cols-2">
-              {safeguards.map(({ Icon, title, body }, index) => (
-                <Reveal
-                  as="li"
-                  key={title}
-                  delay={(index % 2) * 120}
-                  className="flex gap-5 border-t border-vq-bone/15 pt-7"
-                >
-                  <Icon
-                    size={22}
-                    strokeWidth={1.5}
-                    className="mt-1 shrink-0 text-vq-brass-light"
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <h3 className="font-display text-2xl font-semibold">
-                      {title}
-                    </h3>
-                    <p className="mt-2 max-w-md text-[15px] leading-relaxed text-vq-ash">
-                      {body}
-                    </p>
-                  </div>
-                </Reveal>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* ---------- Closing ---------- */}
-        <section className="relative overflow-hidden py-24 lg:py-36">
-          <div
-            className="vq-backdrop left-1/2 top-1/2 w-[560px] max-w-[120vw] -translate-x-1/2 -translate-y-1/2"
-            aria-hidden="true"
-          >
-            <Rose className="vq-turn" />
-          </div>
-          <Reveal className="relative mx-auto max-w-3xl px-5 text-center sm:px-8">
-            <h2 className="vq-display text-5xl sm:text-6xl lg:text-7xl">
-              Set out your next project <em>properly.</em>
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-vq-soft">
-              Create your account and request your role. Your administrator
-              does the rest.
+              VORQ is construction management software. The estimate, purchase
+              orders, store stock, labour attendance, subcontract work and
+              client bills for a project all sit on the same record, so the
+              office and the site work from the same numbers.
             </p>
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
+            <div
+              className="vq-rise mt-9 flex flex-wrap gap-3"
+              style={{ "--delay": "340ms" } as CSSProperties}
+            >
               <a href={SIGN_UP} className="vq-btn">
                 Create account
                 <ArrowRight size={16} className="vq-nudge" aria-hidden="true" />
@@ -508,25 +183,201 @@ export function Landing() {
                 Sign in
               </a>
             </div>
-          </Reveal>
+            <p
+              className="vq-rise mt-6 text-sm text-vq-muted"
+              style={{ "--delay": "460ms" } as CSSProperties}
+            >
+              Works in the browser and on the phone, with the same login.
+            </p>
+          </div>
+          <Plate
+            name="masons"
+            eager
+            sheet
+            className="mx-auto w-full max-w-[420px] lg:col-span-5 lg:max-w-none"
+            alt="Eighteenth-century engraving of a building site: masons cutting and setting stone beside a scaffold, with eight figures of brick bonding below."
+            caption="Masons on site, and eight ways to bond a wall. Engraved by Prévost after Lucotte for the Encyclopédie, Paris, 1762."
+          />
+        </section>
+
+        {/* ---------- What it covers ---------- */}
+        <section
+          id="covers"
+          className="scroll-mt-16 border-t border-vq-line py-20 lg:py-28"
+        >
+          <div className="mx-auto grid max-w-6xl gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-8">
+            <div className="order-2 lg:order-1 lg:col-span-4">
+              <Plate
+                name="machines"
+                className="mx-auto max-w-[340px] lg:sticky lg:top-24 lg:mx-0"
+                alt="Engraving of masons' hoists, shear legs, scaffolds and lifting tackle."
+                caption="Hoists, shear legs and tackle, from the masonry plates of the same volume."
+              />
+            </div>
+            <div className="order-1 lg:order-2 lg:col-span-7 lg:col-start-6">
+              <Reveal>
+                <h2 className="vq-display text-4xl sm:text-5xl">
+                  What VORQ keeps track of
+                </h2>
+                <p className="vq-prose mt-5 max-w-xl">
+                  Seven parts of the job, all tied to the same project.
+                </p>
+              </Reveal>
+              <ol className="vq-contents mt-10">
+                {contents.map(([title, body], index) => (
+                  <li key={title}>
+                    <span className="vq-num">{index + 1}.</span>
+                    <h3 className="text-[17px] font-semibold">{title}</h3>
+                    <p className="col-start-2 text-[15px] leading-relaxed text-vq-soft sm:col-start-3">
+                      {body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Worked example ---------- */}
+        <section
+          id="example"
+          className="scroll-mt-16 border-t border-vq-line bg-vq-vellum/50 py-20 lg:py-28"
+        >
+          <div className="mx-auto grid max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:gap-8">
+            <Reveal className="lg:col-span-4">
+              <h2 className="vq-display text-4xl sm:text-5xl">
+                One BOQ item, followed through
+              </h2>
+              <p className="vq-prose mt-5">
+                Take a single line from a house: 230 mm brick masonry on the
+                ground floor. This is what ends up recorded against it.
+              </p>
+              <p className="vq-prose mt-4">
+                All five entries belong to the same project record. Nobody
+                keeps a separate sheet.
+              </p>
+            </Reveal>
+            <div
+              ref={ledgerRef}
+              className={`overflow-x-auto lg:col-span-8 ${ledgerSeen ? "is-in" : ""}`}
+            >
+              <table className="vq-ledger">
+                <caption>The figures are made up for this example.</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Where</th>
+                    <th scope="col">Entry</th>
+                    <th scope="col" className="vq-figure">
+                      Quantity
+                    </th>
+                    <th scope="col" className="vq-figure">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ledger.map(([where, entry, quantity, amount], index) => (
+                    <tr key={where} style={{ "--row": index } as CSSProperties}>
+                      <td>{where}</td>
+                      <td className="text-vq-soft">{entry}</td>
+                      <td className="vq-figure">{quantity}</td>
+                      <td className="vq-figure">{amount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Access ---------- */}
+        <section
+          id="access"
+          className="vq-on-night relative scroll-mt-16 overflow-hidden bg-vq-night py-20 text-vq-bone lg:py-28"
+        >
+          <div
+            className="vq-drift pointer-events-none absolute -right-10 top-0 hidden w-[520px] lg:block"
+            style={{ "--k": -0.04 } as CSSProperties}
+            aria-hidden="true"
+          >
+            <Plate name="stonecut" alt="" className="is-ghost" />
+          </div>
+          <div className="relative mx-auto max-w-6xl px-5 sm:px-8">
+            <Reveal className="max-w-2xl">
+              <h2 className="vq-display text-4xl sm:text-5xl">
+                Who gets in, and how
+              </h2>
+            </Reveal>
+            <div className="mt-12 grid max-w-3xl gap-10">
+              <Reveal>
+                <h3 className="vq-label">Accounts are approved by a person</h3>
+                <p className="vq-prose mt-3">
+                  Signing up does not give access to anything. Your
+                  administrator confirms who you are, then assigns your
+                  company, your projects and your role.
+                </p>
+              </Reveal>
+              <Reveal>
+                <h3 className="vq-label">Eight roles</h3>
+                <ul className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2.5 text-[17px] sm:grid-cols-4">
+                  {roles.map((role) => (
+                    <li key={role}>{role}</li>
+                  ))}
+                </ul>
+              </Reveal>
+              <Reveal>
+                <h3 className="vq-label">Two-step sign-in</h3>
+                <p className="vq-prose mt-3">
+                  After your password you enter a code from an authenticator
+                  app, such as Google Authenticator. When you set it up you get
+                  a set of one-time recovery codes, in case you lose the phone.
+                </p>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Closing ---------- */}
+        <section className="pt-20 lg:pt-28">
+          <div className="mx-auto max-w-6xl px-5 sm:px-8">
+            <Plate
+              name="house"
+              className="mx-auto max-w-3xl"
+              alt="Engraved garden elevation of a two-storey house with arched ground-floor openings, a balustrade and trees on either side."
+            />
+            <div className="border-t border-vq-ink" />
+            <Reveal className="flex flex-col gap-8 py-14 lg:flex-row lg:items-end lg:justify-between lg:py-20">
+              <div>
+                <h2 className="vq-display text-4xl sm:text-5xl">
+                  Create your account
+                </h2>
+                <p className="vq-prose mt-4 max-w-lg">
+                  It takes a couple of minutes. Keep your phone nearby: you
+                  will need an authenticator app to finish.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <a href={SIGN_UP} className="vq-btn">
+                  Create account
+                  <ArrowRight size={16} className="vq-nudge" aria-hidden="true" />
+                </a>
+                <a href={SIGN_IN} className="vq-btn-ghost">
+                  Sign in
+                </a>
+              </div>
+            </Reveal>
+          </div>
         </section>
       </main>
 
       <footer className="border-t border-vq-line">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-5 py-10 sm:flex-row sm:items-center sm:px-8">
-          <Logo size={24} />
-          <p className="text-[13px] text-vq-muted">
-            © {new Date().getFullYear()} VORQ. Construction operations &amp;
-            financial control.
+        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-5 py-9 text-[13px] text-vq-muted sm:px-8 md:flex-row md:items-center md:justify-between">
+          <Logo size={22} className="text-vq-ink" />
+          <p className="max-w-md md:text-center">
+            Engravings from the plate volumes of Diderot and d’Alembert’s
+            Encyclopédie (1762). Public domain, via Wikimedia Commons.
           </p>
-          <div className="flex gap-6 text-[13px] text-vq-soft">
-            <a href={SIGN_IN} className="vq-link">
-              Sign in
-            </a>
-            <a href={SIGN_UP} className="vq-link">
-              Create account
-            </a>
-          </div>
+          <p>© {new Date().getFullYear()} VORQ</p>
         </div>
       </footer>
     </div>

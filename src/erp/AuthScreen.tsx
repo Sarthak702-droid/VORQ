@@ -11,7 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { api } from "./api";
-import { Arch, Rose } from "./public/Drawings";
+import { Plate } from "./public/Plate";
 import { Logo } from "./public/Logo";
 type Captcha = {
   id: string;
@@ -236,7 +236,7 @@ export function AuthScreen({
           ? "Create your account"
           : "Sign in to VORQ";
   const lede = codes.length
-    ? "Each code works once. Keep them somewhere other than this device — they will not be shown again."
+    ? "Each code works once. Keep them somewhere other than this device. They will not be shown again."
     : pending?.stage === "enroll"
       ? "Scan the code with Google Authenticator, Microsoft Authenticator or another TOTP app, then enter the current code."
       : pending
@@ -247,25 +247,20 @@ export function AuthScreen({
 
   return (
     <div className="vq-public lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <aside className="vq-on-night relative hidden h-screen flex-col justify-between overflow-hidden bg-vq-night p-12 text-vq-bone lg:sticky lg:top-0 lg:flex xl:p-16">
-        <div className="vq-backdrop -right-24 -top-24 w-[340px]">
-          <Rose className="vq-turn" />
-        </div>
-        <a href="#/" aria-label="VORQ home" className="relative w-fit">
-          <Logo size={30} />
+      <aside className="vq-on-night relative hidden h-screen flex-col justify-between overflow-hidden bg-vq-night p-12 text-vq-bone lg:sticky lg:top-0 lg:flex xl:p-14">
+        <a href="#/" aria-label="VORQ home" className="w-fit">
+          <Logo size={28} />
         </a>
-        <div className="vq-fine relative mx-auto w-full max-w-[360px] text-vq-brass-light/70">
-          <Arch />
-        </div>
-        <div className="relative">
-          <p className="vq-display text-[2.75rem] xl:text-5xl">
-            Measure twice. <em>Bill once.</em>
-          </p>
-          <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-vq-ash">
-            Estimates, procurement, stores, labour, subcontracts and billing —
-            one measured record of the job.
-          </p>
-        </div>
+        <Plate
+          name="plan"
+          eager
+          className="mx-auto w-full max-w-[min(360px,42vh)]"
+          alt="Engraved ground-floor plan of a house, with rooms labelled by hand around a central court."
+          caption="Ground-floor plan for a house in Avignon. Encyclopédie, plates volume 1, Paris, 1762."
+        />
+        <p className="max-w-sm text-[15px] leading-relaxed text-vq-ash">
+          Construction operations and billing for residential contractors.
+        </p>
       </aside>
 
       <main className="flex min-h-screen flex-col px-5 pb-10 pt-5 sm:px-10">

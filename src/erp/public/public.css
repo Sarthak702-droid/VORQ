@@ -1,75 +1,67 @@
-/* Public surface (landing + sign-in): paper, ink and brass. Scoped to .vq-public. */
+/* Public surface (landing + sign-in). Black ink and one red on book paper.
+   Scoped to .vq-public so the workspace theme is untouched. */
 
 .vq-public {
-  --vq-paper: #f5f0e6;
-  --vq-ink: #1a1814;
-  --vq-line: #d9cfbb;
-  --vq-brass: #a9803f;
+  --vq-paper: #f3eee2;
+  --vq-sheet: #faf6ec;
+  --vq-ink: #1b1915;
+  --vq-soft: #4a463d;
+  --vq-muted: #6a6558;
+  --vq-line: #d6cdb9;
+  --vq-red: #9b3a22;
   --vq-ease: cubic-bezier(0.22, 0.7, 0.2, 1);
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
   color: var(--vq-ink);
   background-color: var(--vq-paper);
-  /* Laid-paper grain over a faint drafting grid. */
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .28 0 0 0 0 .15 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(#1a18140a 1px, transparent 1px),
-    linear-gradient(90deg, #1a18140a 1px, transparent 1px);
-  background-size: 240px 240px, 48px 48px, 48px 48px;
+  /* Paper grain. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .28 0 0 0 0 .15 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
 }
 
 .vq-public ::selection {
-  background: #a9803f40;
+  background: #9b3a2233;
 }
 
 .vq-public :is(button, a):focus-visible {
   outline: 2px solid var(--vq-ink);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 .vq-public .vq-on-night :is(button, a):focus-visible {
-  outline-color: #cda863;
+  outline-color: #f3eee2;
 }
 
 /* ---------- Type ---------- */
 
-.vq-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #7a5a22;
-}
-.vq-eyebrow::before {
-  content: "";
-  width: 28px;
-  height: 1px;
-  background: currentColor;
-}
-.vq-on-night .vq-eyebrow {
-  color: #cda863;
-}
-
 .vq-display {
-  font-family: "Cormorant Garamond", Cormorant, Georgia, serif;
-  font-weight: 500;
-  line-height: 1.02;
-  letter-spacing: -0.015em;
+  font-family: "Libre Caslon Display", "Libre Caslon Text", Georgia, serif;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.012em;
   text-wrap: balance;
 }
-.vq-display em {
-  font-style: italic;
-  color: #7a5a22;
+.vq-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vq-red);
 }
-.vq-on-night .vq-display em {
-  color: #cda863;
+.vq-on-night .vq-label {
+  color: #dc9478;
+}
+.vq-prose {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--vq-soft);
+}
+.vq-on-night .vq-prose {
+  color: #b4ad9d;
 }
 
-/* ---------- Buttons ---------- */
+/* ---------- Buttons and links ---------- */
 
 .vq-btn,
 .vq-btn-ghost {
@@ -78,11 +70,10 @@
   justify-content: center;
   gap: 10px;
   min-height: 48px;
-  padding: 0 24px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0 22px;
+  border-radius: 4px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.01em;
   cursor: pointer;
   transition:
     background-color 200ms,
@@ -91,12 +82,13 @@
     transform 200ms var(--vq-ease);
 }
 .vq-btn {
-  color: #f5f0e6;
+  color: #f3eee2;
   background: var(--vq-ink);
   border: 1px solid var(--vq-ink);
 }
 .vq-btn:hover:not(:disabled) {
-  background: #2e2a22;
+  background: var(--vq-red);
+  border-color: var(--vq-red);
 }
 .vq-btn svg {
   transition: transform 200ms var(--vq-ease);
@@ -107,11 +99,11 @@
 .vq-btn-ghost {
   color: var(--vq-ink);
   background: transparent;
-  border: 1px solid #1a181440;
+  border: 1px solid #1b191559;
 }
 .vq-btn-ghost:hover:not(:disabled) {
   border-color: var(--vq-ink);
-  background: #1a181408;
+  background: #1b19150a;
 }
 .vq-btn:active:not(:disabled),
 .vq-btn-ghost:active:not(:disabled) {
@@ -121,22 +113,6 @@
 .vq-btn-ghost:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-.vq-on-night .vq-btn {
-  color: var(--vq-ink);
-  background: #efe8d8;
-  border-color: #efe8d8;
-}
-.vq-on-night .vq-btn:hover:not(:disabled) {
-  background: #fff;
-}
-.vq-on-night .vq-btn-ghost {
-  color: #efe8d8;
-  border-color: #efe8d840;
-}
-.vq-on-night .vq-btn-ghost:hover:not(:disabled) {
-  border-color: #efe8d8;
-  background: #efe8d80d;
 }
 
 .vq-link {
@@ -171,165 +147,139 @@
   border-bottom: 1px solid transparent;
   transition:
     background-color 300ms,
-    border-color 300ms,
-    backdrop-filter 300ms;
+    border-color 300ms;
 }
 .vq-nav.is-stuck {
-  background: #f5f0e6e6;
+  background: #f3eee2f2;
   border-bottom-color: var(--vq-line);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 }
 
-/* ---------- Drawings ---------- */
+/* ---------- Engraved plates ---------- */
 
-.vq-sketch {
+.vq-plate img {
   display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
+  opacity: 0.9;
 }
-.vq-note {
-  fill: currentColor;
-  stroke: none;
-  font-family: "Cormorant Garamond", Cormorant, Georgia, serif;
+.vq-plate figcaption {
+  margin-top: 12px;
+  font-family: "Libre Caslon Text", Georgia, serif;
   font-style: italic;
-  letter-spacing: 0.03em;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--vq-muted);
 }
-.vq-backdrop {
-  position: absolute;
-  pointer-events: none;
-  color: var(--vq-ink);
-  opacity: 0.16;
-}
-/* Backdrops are small drawings shown large: thin the pen so they stay quiet. */
-.vq-backdrop path,
-.vq-fine path {
-  stroke-width: 0.4px;
-}
-.vq-on-night .vq-backdrop {
-  color: #cda863;
-  opacity: 0.28;
-}
-
-/* ---------- Title block (the strip under the hero) ---------- */
-
-.vq-titleblock {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  border: 1px solid var(--vq-ink);
-  background: #fbf8f1b3;
-}
-.vq-titleblock > div {
-  padding: 16px 20px;
-  border-color: #1a181433;
-  border-style: solid;
-  border-width: 0;
-}
-.vq-titleblock > div:nth-child(odd) {
-  border-right-width: 1px;
-}
-.vq-titleblock > div:nth-child(-n + 2) {
-  border-bottom-width: 1px;
-}
-@media (min-width: 1024px) {
-  .vq-titleblock {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .vq-titleblock > div {
-    border-bottom-width: 0 !important;
-    border-right-width: 1px;
-  }
-  .vq-titleblock > div:last-child {
-    border-right-width: 0;
-  }
-}
-.vq-titleblock dt {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #6b6558;
-}
-.vq-titleblock dd {
-  margin-top: 6px;
-  font-family: "Cormorant Garamond", Cormorant, Georgia, serif;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.15;
-}
-
-/* ---------- Plates (module cards) ---------- */
-
-.vq-plate {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: 28px;
-  background: #fbf8f1cc;
+.vq-sheet {
+  padding: clamp(14px, 2.4vw, 28px);
+  background: var(--vq-sheet);
   border: 1px solid var(--vq-line);
-  transition:
-    border-color 300ms,
-    background-color 300ms,
-    transform 400ms var(--vq-ease),
-    box-shadow 400ms var(--vq-ease);
+  box-shadow:
+    0 1px 0 #fff inset,
+    0 30px 50px -40px #1b191580;
 }
-.vq-plate::after {
-  /* inner rule, like the border of an engraved plate */
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border: 1px solid #1a181412;
-  pointer-events: none;
-  transition: border-color 300ms;
+/* On the dark panels the same ink prints light. */
+.vq-on-night .vq-plate img {
+  filter: invert(1) sepia(0.25);
+  opacity: 0.8;
 }
-.vq-plate:hover {
-  background: #fbf8f1;
-  border-color: #1a181466;
-  transform: translateY(-4px);
-  box-shadow: 0 24px 40px -28px #1a181466;
+.vq-on-night .vq-plate figcaption {
+  color: #9a9383;
 }
-.vq-plate:hover::after {
-  border-color: #a9803f66;
+.vq-plate.is-ghost img {
+  opacity: 0.2;
 }
-.vq-plate-art {
-  width: 104px;
-  color: #4a453c;
-  transition: color 300ms;
-}
-.vq-plate:hover .vq-plate-art {
-  color: var(--vq-ink);
+.vq-on-night .vq-plate.is-ghost img {
+  opacity: 0.22;
 }
 
-/* ---------- Process ---------- */
+/* ---------- Contents list ---------- */
 
-.vq-rule {
-  height: 1px;
-  background: var(--vq-ink);
-  transform-origin: left;
-}
-
-/* ---------- Role index ---------- */
-
-.vq-roles li {
+.vq-contents li {
   display: grid;
-  grid-template-columns: 2.5rem 1fr;
-  gap: 4px 12px;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 2px 8px;
   padding: 18px 0;
   border-top: 1px solid var(--vq-line);
-  transition: padding-left 300ms var(--vq-ease);
 }
-.vq-roles li:last-child {
+.vq-contents li:last-child {
   border-bottom: 1px solid var(--vq-line);
 }
 @media (min-width: 640px) {
-  .vq-roles li {
-    grid-template-columns: 3rem 15rem 1fr;
+  .vq-contents li {
+    grid-template-columns: 2.5rem 13rem 1fr;
     align-items: baseline;
   }
 }
-@media (hover: hover) {
-  .vq-roles li:hover {
-    padding-left: 10px;
+.vq-contents .vq-num {
+  font-family: "Libre Caslon Text", Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--vq-red);
+}
+
+/* ---------- Ledger (worked example) ---------- */
+
+.vq-ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  background: var(--vq-sheet);
+  border: 1px solid var(--vq-line);
+}
+.vq-ledger caption {
+  caption-side: bottom;
+  padding-top: 12px;
+  text-align: left;
+  font-family: "Libre Caslon Text", Georgia, serif;
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--vq-muted);
+}
+.vq-ledger th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vq-muted);
+  border-bottom: 2px solid var(--vq-ink);
+}
+.vq-ledger td {
+  padding: 15px 16px;
+  vertical-align: baseline;
+  border-bottom: 1px solid #9db4c266; /* the faint blue feint line of an account book */
+}
+.vq-ledger tr:last-child td {
+  border-bottom: 0;
+}
+.vq-ledger :is(th, td).vq-figure {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+/* The red margin rule that separates the money column. */
+.vq-ledger :is(th, td):last-child {
+  border-left: 1px solid #9b3a2299;
+}
+.vq-ledger td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  .vq-ledger {
+    font-size: 13px;
+  }
+  .vq-ledger :is(th, td) {
+    padding: 12px 8px;
+  }
+  .vq-ledger th {
+    letter-spacing: 0.06em;
+  }
+  .vq-ledger td:first-child {
+    white-space: normal;
   }
 }
 
@@ -339,7 +289,7 @@
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #4a453c;
+  color: var(--vq-soft);
 }
 .vq-form :is(input:not([type="checkbox"]), select) {
   width: 100%;
@@ -350,7 +300,7 @@
   color: var(--vq-ink);
   background: #fffdf8;
   border: 1px solid var(--vq-line);
-  border-radius: 6px;
+  border-radius: 4px;
   outline: none;
   box-shadow: none;
   transition:
@@ -363,20 +313,20 @@
   }
 }
 .vq-form :is(input, select):hover:not(:disabled) {
-  border-color: #b9ad94;
+  border-color: #b5aa90;
 }
 .vq-form :is(input:not([type="checkbox"]), select):focus {
   border-color: var(--vq-ink);
-  box-shadow: 0 0 0 3px #a9803f38;
+  box-shadow: 0 0 0 3px #1b19151f;
 }
 .vq-form :is(input, select):disabled {
-  background: #f0eadc;
-  color: #6b6558;
+  background: #efe9db;
+  color: var(--vq-muted);
 }
 .vq-form .vq-hint {
   font-size: 12px;
   line-height: 1.55;
-  color: #6b6558;
+  color: var(--vq-muted);
 }
 .vq-form .vq-code-input {
   height: 56px;
@@ -394,8 +344,8 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  color: #6b6558;
-  border-radius: 6px;
+  color: var(--vq-muted);
+  border-radius: 4px;
   cursor: pointer;
   transition:
     color 200ms,
@@ -403,7 +353,7 @@
 }
 .vq-icon-btn:hover:not(:disabled) {
   color: var(--vq-ink);
-  background: #1a18140d;
+  background: #1b19150d;
 }
 .vq-tabs {
   display: flex;
@@ -416,7 +366,7 @@
   padding: 0 2px;
   font-size: 14px;
   font-weight: 500;
-  color: #6b6558;
+  color: var(--vq-muted);
   cursor: pointer;
   transition: color 200ms;
 }
@@ -451,17 +401,15 @@
   background: #fbefec;
   border: 1px solid #e9c9c2;
   border-left: 3px solid #b3261e;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 .vq-steps {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #8f8777;
+  color: var(--vq-muted);
 }
 .vq-steps li {
   display: flex;
@@ -475,95 +423,76 @@
   background: var(--vq-line);
 }
 .vq-steps li[aria-current="step"] {
-  color: #7a5a22;
+  color: var(--vq-red);
 }
 .vq-steps li.is-done {
-  color: #4a453c;
+  color: var(--vq-soft);
 }
 
 /* ---------- Motion (only when the visitor has not asked for less) ---------- */
 
 @media (prefers-reduced-motion: no-preference) {
-  .vq-sketch .vq-ink {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
+  /* A plate comes up the way a print comes off the press: top edge first. */
+  .vq-plate img {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 1600ms cubic-bezier(0.65, 0.05, 0.25, 1) var(--delay, 0ms);
   }
-  .vq-sketch :is(.vq-faint, .vq-note) {
+  .vq-plate figcaption {
     opacity: 0;
+    transition: opacity 800ms ease calc(var(--delay, 0ms) + 1100ms);
   }
-  .vq-sketch.is-in .vq-ink {
-    animation: vq-draw 1.5s cubic-bezier(0.6, 0.05, 0.2, 1) forwards;
-    animation-delay: calc(var(--i, 0) * 80ms + var(--vq-lag, 0ms));
+  .vq-plate.is-in img {
+    clip-path: inset(0);
   }
-  .vq-sketch.is-in :is(.vq-faint, .vq-note) {
-    animation: vq-fade 1s ease forwards;
-    animation-delay: calc(var(--i, 0) * 80ms + var(--vq-lag, 0ms) + 300ms);
+  .vq-plate.is-in figcaption {
+    opacity: 1;
   }
 
   .vq-reveal {
     opacity: 0;
-    transform: translateY(22px);
+    transform: translateY(18px);
     transition:
-      opacity 900ms var(--vq-ease) var(--delay, 0ms),
-      transform 900ms var(--vq-ease) var(--delay, 0ms),
-      padding-left 300ms var(--vq-ease);
+      opacity 800ms var(--vq-ease) var(--delay, 0ms),
+      transform 800ms var(--vq-ease) var(--delay, 0ms);
   }
   .vq-reveal.is-in {
     opacity: 1;
     transform: none;
   }
 
-  .vq-rule {
-    transform: scaleX(0);
-    transition: transform 1600ms var(--vq-ease);
-  }
-  .is-in > .vq-rule,
-  .vq-rule.is-in {
-    transform: scaleX(1);
-  }
-
   .vq-rise {
     opacity: 0;
-    animation: vq-rise 900ms var(--vq-ease) forwards;
+    animation: vq-rise 800ms var(--vq-ease) forwards;
     animation-delay: var(--delay, 0ms);
   }
 
   .vq-drift {
-    transform: translate3d(0, calc(var(--vq-y, 0) * var(--k, -0.06) * 1px), 0);
+    transform: translate3d(0, calc(var(--vq-y, 0) * var(--k, -0.05) * 1px), 0);
     will-change: transform;
   }
-  .vq-turn {
-    animation: vq-turn 140s linear infinite;
+
+  /* Ledger rows are entered one after another. */
+  .vq-ledger tbody tr {
+    opacity: 0;
+    transition: opacity 600ms ease calc(var(--row, 0) * 220ms + 200ms);
+  }
+  .is-in > .vq-ledger tbody tr {
+    opacity: 1;
   }
 
   .vq-swap {
-    animation: vq-swap 450ms var(--vq-ease);
+    animation: vq-swap 400ms var(--vq-ease);
   }
 }
 
-@keyframes vq-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-@keyframes vq-fade {
-  to {
-    opacity: 1;
-  }
-}
 @keyframes vq-rise {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: none;
-  }
-}
-@keyframes vq-turn {
-  to {
-    rotate: 360deg;
   }
 }
 @keyframes vq-swap {
