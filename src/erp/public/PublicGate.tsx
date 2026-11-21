@@ -58,8 +58,6 @@ export function PublicGate({
   if (route === "home") return <Landing />;
   return (
     <AuthScreen
-      // Remount per route so a pending enrollment never leaks across #/signin and #/signup.
-      key={route}
       mode={route}
       notice={notice}
       onModeChange={(mode) => {

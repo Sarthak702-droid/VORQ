@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -114,6 +114,26 @@ export function AuthScreen({
     [busy, setBusy] = useState(false),
     [copied, setCopied] = useState(false),
     [error, setError] = useState("");
+  // Navigating between #/signin and #/signup abandons an unfinished verification,
+  // but never the one-time recovery codes: those stay until acknowledged.
+  const firstMode = useRef(true);
+  useEffect(() => {
+    if (firstMode.current) {
+      firstMode.current = false;
+      return;
+    }
+    if (codes.length) return;
+    setPending(null);
+    setCode("");
+    setRecovery(false);
+    setError("");
+    setCaptcha(null);
+    setAnswer("");
+    api<Captcha>("auth_challenge")
+      .then(setCaptcha)
+      .catch((err) => setError(err.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
   useEffect(() => {
     let active = true;
     api<Captcha>("auth_challenge")
