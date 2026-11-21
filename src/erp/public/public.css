@@ -1,0 +1,578 @@
+/* Public surface (landing + sign-in): paper, ink and brass. Scoped to .vq-public. */
+
+.vq-public {
+  --vq-paper: #f5f0e6;
+  --vq-ink: #1a1814;
+  --vq-line: #d9cfbb;
+  --vq-brass: #a9803f;
+  --vq-ease: cubic-bezier(0.22, 0.7, 0.2, 1);
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--vq-ink);
+  background-color: var(--vq-paper);
+  /* Laid-paper grain over a faint drafting grid. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .28 0 0 0 0 .15 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(#1a18140a 1px, transparent 1px),
+    linear-gradient(90deg, #1a18140a 1px, transparent 1px);
+  background-size: 240px 240px, 48px 48px, 48px 48px;
+}
+
+.vq-public ::selection {
+  background: #a9803f40;
+}
+
+.vq-public :is(button, a):focus-visible {
+  outline: 2px solid var(--vq-ink);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.vq-public .vq-on-night :is(button, a):focus-visible {
+  outline-color: #cda863;
+}
+
+/* ---------- Type ---------- */
+
+.vq-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #7a5a22;
+}
+.vq-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+}
+.vq-on-night .vq-eyebrow {
+  color: #cda863;
+}
+
+.vq-display {
+  font-family: "Cormorant Garamond", Cormorant, Georgia, serif;
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.vq-display em {
+  font-style: italic;
+  color: #7a5a22;
+}
+.vq-on-night .vq-display em {
+  color: #cda863;
+}
+
+/* ---------- Buttons ---------- */
+
+.vq-btn,
+.vq-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background-color 200ms,
+    color 200ms,
+    border-color 200ms,
+    transform 200ms var(--vq-ease);
+}
+.vq-btn {
+  color: #f5f0e6;
+  background: var(--vq-ink);
+  border: 1px solid var(--vq-ink);
+}
+.vq-btn:hover:not(:disabled) {
+  background: #2e2a22;
+}
+.vq-btn svg {
+  transition: transform 200ms var(--vq-ease);
+}
+.vq-btn:hover:not(:disabled) svg.vq-nudge {
+  transform: translateX(3px);
+}
+.vq-btn-ghost {
+  color: var(--vq-ink);
+  background: transparent;
+  border: 1px solid #1a181440;
+}
+.vq-btn-ghost:hover:not(:disabled) {
+  border-color: var(--vq-ink);
+  background: #1a181408;
+}
+.vq-btn:active:not(:disabled),
+.vq-btn-ghost:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.vq-btn:disabled,
+.vq-btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.vq-on-night .vq-btn {
+  color: var(--vq-ink);
+  background: #efe8d8;
+  border-color: #efe8d8;
+}
+.vq-on-night .vq-btn:hover:not(:disabled) {
+  background: #fff;
+}
+.vq-on-night .vq-btn-ghost {
+  color: #efe8d8;
+  border-color: #efe8d840;
+}
+.vq-on-night .vq-btn-ghost:hover:not(:disabled) {
+  border-color: #efe8d8;
+  background: #efe8d80d;
+}
+
+.vq-link {
+  position: relative;
+  cursor: pointer;
+  color: inherit;
+  transition: color 200ms;
+}
+.vq-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 300ms var(--vq-ease);
+}
+.vq-link:hover::after,
+.vq-link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ---------- Navigation ---------- */
+
+.vq-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 300ms,
+    border-color 300ms,
+    backdrop-filter 300ms;
+}
+.vq-nav.is-stuck {
+  background: #f5f0e6e6;
+  border-bottom-color: var(--vq-line);
+  backdrop-filter: blur(10px);
+}
+
+/* ---------- Drawings ---------- */
+
+.vq-sketch {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.vq-note {
+  fill: currentColor;
+  stroke: none;
+  font-family: "Cormorant Garamond", Cormorant, Georgia, serif;
+  font-style: italic;
+  letter-spacing: 0.03em;
+}
+.vq-backdrop {
+  position: absolute;
+  pointer-events: none;
+  color: var(--vq-ink);
+  opacity: 0.16;
+}
+/* Backdrops are small drawings shown large: thin the pen so they stay quiet. */
+.vq-backdrop path,
+.vq-fine path {
+  stroke-width: 0.4px;
+}
+.vq-on-night .vq-backdrop {
+  color: #cda863;
+  opacity: 0.28;
+}
+
+/* ---------- Title block (the strip under the hero) ---------- */
+
+.vq-titleblock {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid var(--vq-ink);
+  background: #fbf8f1b3;
+}
+.vq-titleblock > div {
+  padding: 16px 20px;
+  border-color: #1a181433;
+  border-style: solid;
+  border-width: 0;
+}
+.vq-titleblock > div:nth-child(odd) {
+  border-right-width: 1px;
+}
+.vq-titleblock > div:nth-child(-n + 2) {
+  border-bottom-width: 1px;
+}
+@media (min-width: 1024px) {
+  .vq-titleblock {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .vq-titleblock > div {
+    border-bottom-width: 0 !important;
+    border-right-width: 1px;
+  }
+  .vq-titleblock > div:last-child {
+    border-right-width: 0;
+  }
+}
+.vq-titleblock dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6b6558;
+}
+.vq-titleblock dd {
+  margin-top: 6px;
+  font-family: "Cormorant Garamond", Cormorant, Georgia, serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+/* ---------- Plates (module cards) ---------- */
+
+.vq-plate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+  background: #fbf8f1cc;
+  border: 1px solid var(--vq-line);
+  transition:
+    border-color 300ms,
+    background-color 300ms,
+    transform 400ms var(--vq-ease),
+    box-shadow 400ms var(--vq-ease);
+}
+.vq-plate::after {
+  /* inner rule, like the border of an engraved plate */
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid #1a181412;
+  pointer-events: none;
+  transition: border-color 300ms;
+}
+.vq-plate:hover {
+  background: #fbf8f1;
+  border-color: #1a181466;
+  transform: translateY(-4px);
+  box-shadow: 0 24px 40px -28px #1a181466;
+}
+.vq-plate:hover::after {
+  border-color: #a9803f66;
+}
+.vq-plate-art {
+  width: 104px;
+  color: #4a453c;
+  transition: color 300ms;
+}
+.vq-plate:hover .vq-plate-art {
+  color: var(--vq-ink);
+}
+
+/* ---------- Process ---------- */
+
+.vq-rule {
+  height: 1px;
+  background: var(--vq-ink);
+  transform-origin: left;
+}
+
+/* ---------- Role index ---------- */
+
+.vq-roles li {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 4px 12px;
+  padding: 18px 0;
+  border-top: 1px solid var(--vq-line);
+  transition: padding-left 300ms var(--vq-ease);
+}
+.vq-roles li:last-child {
+  border-bottom: 1px solid var(--vq-line);
+}
+@media (min-width: 640px) {
+  .vq-roles li {
+    grid-template-columns: 3rem 15rem 1fr;
+    align-items: baseline;
+  }
+}
+@media (hover: hover) {
+  .vq-roles li:hover {
+    padding-left: 10px;
+  }
+}
+
+/* ---------- Auth form ---------- */
+
+.vq-form label.vq-field {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a453c;
+}
+.vq-form :is(input:not([type="checkbox"]), select) {
+  width: 100%;
+  height: 46px;
+  margin-top: 6px;
+  padding: 0 14px;
+  font-size: 16px; /* 16px stops iOS zooming the page on focus */
+  color: var(--vq-ink);
+  background: #fffdf8;
+  border: 1px solid var(--vq-line);
+  border-radius: 6px;
+  outline: none;
+  box-shadow: none;
+  transition:
+    border-color 200ms,
+    box-shadow 200ms;
+}
+@media (min-width: 640px) {
+  .vq-form :is(input:not([type="checkbox"]), select) {
+    font-size: 14px;
+  }
+}
+.vq-form :is(input, select):hover:not(:disabled) {
+  border-color: #b9ad94;
+}
+.vq-form :is(input:not([type="checkbox"]), select):focus {
+  border-color: var(--vq-ink);
+  box-shadow: 0 0 0 3px #a9803f38;
+}
+.vq-form :is(input, select):disabled {
+  background: #f0eadc;
+  color: #6b6558;
+}
+.vq-form .vq-hint {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #6b6558;
+}
+.vq-form .vq-code-input {
+  height: 56px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+.vq-form .vq-code-input.is-recovery {
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+.vq-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #6b6558;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color 200ms,
+    background-color 200ms;
+}
+.vq-icon-btn:hover:not(:disabled) {
+  color: var(--vq-ink);
+  background: #1a18140d;
+}
+.vq-tabs {
+  display: flex;
+  gap: 28px;
+  border-bottom: 1px solid var(--vq-line);
+}
+.vq-tabs [role="tab"] {
+  position: relative;
+  min-height: 44px;
+  padding: 0 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b6558;
+  cursor: pointer;
+  transition: color 200ms;
+}
+.vq-tabs [role="tab"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--vq-ink);
+  transform: scaleX(0);
+  transition: transform 300ms var(--vq-ease);
+}
+.vq-tabs [role="tab"]:hover {
+  color: var(--vq-ink);
+}
+.vq-tabs [role="tab"][aria-selected="true"] {
+  color: var(--vq-ink);
+  font-weight: 600;
+}
+.vq-tabs [role="tab"][aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+.vq-alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #8a1c1c;
+  background: #fbefec;
+  border: 1px solid #e9c9c2;
+  border-left: 3px solid #b3261e;
+  border-radius: 6px;
+}
+.vq-steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8f8777;
+}
+.vq-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vq-steps li + li::before {
+  content: "";
+  width: 20px;
+  height: 1px;
+  background: var(--vq-line);
+}
+.vq-steps li[aria-current="step"] {
+  color: #7a5a22;
+}
+.vq-steps li.is-done {
+  color: #4a453c;
+}
+
+/* ---------- Motion (only when the visitor has not asked for less) ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .vq-sketch .vq-ink {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .vq-sketch :is(.vq-faint, .vq-note) {
+    opacity: 0;
+  }
+  .vq-sketch.is-in .vq-ink {
+    animation: vq-draw 1.5s cubic-bezier(0.6, 0.05, 0.2, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 80ms + var(--vq-lag, 0ms));
+  }
+  .vq-sketch.is-in :is(.vq-faint, .vq-note) {
+    animation: vq-fade 1s ease forwards;
+    animation-delay: calc(var(--i, 0) * 80ms + var(--vq-lag, 0ms) + 300ms);
+  }
+
+  .vq-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+      opacity 900ms var(--vq-ease) var(--delay, 0ms),
+      transform 900ms var(--vq-ease) var(--delay, 0ms),
+      padding-left 300ms var(--vq-ease);
+  }
+  .vq-reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .vq-rule {
+    transform: scaleX(0);
+    transition: transform 1600ms var(--vq-ease);
+  }
+  .is-in > .vq-rule,
+  .vq-rule.is-in {
+    transform: scaleX(1);
+  }
+
+  .vq-rise {
+    opacity: 0;
+    animation: vq-rise 900ms var(--vq-ease) forwards;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .vq-drift {
+    transform: translate3d(0, calc(var(--vq-y, 0) * var(--k, -0.06) * 1px), 0);
+    will-change: transform;
+  }
+  .vq-turn {
+    animation: vq-turn 140s linear infinite;
+  }
+
+  .vq-swap {
+    animation: vq-swap 450ms var(--vq-ease);
+  }
+}
+
+@keyframes vq-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes vq-fade {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes vq-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes vq-turn {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes vq-swap {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

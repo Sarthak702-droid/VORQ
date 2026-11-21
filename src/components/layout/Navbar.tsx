@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-3 sm:gap-6 min-w-0">
           <div className="flex items-center gap-2.5">
             <img 
-              src="/assets/vorq-logo.png" 
+              src="/favicon.svg" 
               alt="VORQ" 
               className="h-9 w-9 object-contain rounded-lg border border-slate-700 bg-slate-900 p-0.5 shadow-sm"
               onError={(e) => {

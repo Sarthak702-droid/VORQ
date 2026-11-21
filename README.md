@@ -15,6 +15,8 @@ npm run dev
 
 Web: `http://localhost:5173`. Its `/api` routes proxy to the local VORQ backend at `http://127.0.0.1:18080`.
 
+Signed-out visitors see the landing page at `/`; sign-in and account creation live at `/#/signin` and `/#/signup`. These public screens are in `src/erp/public/` (landing, drawings, logo, styles) and `src/erp/AuthScreen.tsx`.
+
 ```bash
 cd mobile
 npm ci
