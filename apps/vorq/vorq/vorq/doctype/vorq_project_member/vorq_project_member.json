@@ -1,0 +1,38 @@
+{
+  "doctype": "DocType",
+  "name": "VORQ Project Member",
+  "module": "VORQ",
+  "autoname": "hash",
+  "track_changes": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "user",
+    "project"
+  ],
+  "fields": [
+    {
+      "fieldname": "user",
+      "label": "User",
+      "fieldtype": "Link",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "project",
+      "label": "Project",
+      "fieldtype": "Link",
+      "options": "Project",
+      "reqd": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1
+    }
+  ]
+}

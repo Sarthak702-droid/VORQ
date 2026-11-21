@@ -31,7 +31,7 @@ checks=[]
 
 def bench(code):
     pre="import os,json\nos.chdir('/home/frappe/frappe-bench/sites')\nimport frappe\nfrappe.init(site='frontend');frappe.connect()\nfrappe.set_user('Administrator')\n"
-    proc=subprocess.run(COMPOSE+['exec','-T','backend','env/bin/python','-'],cwd=ROOT/'integration-workspace',input=pre+code+'\nfrappe.destroy()\n',capture_output=True,text=True)
+    proc=subprocess.run(COMPOSE+['exec','-T','backend','env/bin/python','-'],cwd=ROOT,input=pre+code+'\nfrappe.destroy()\n',capture_output=True,text=True)
     if proc.returncode:raise RuntimeError(proc.stderr[-2000:])
     return json.loads(proc.stdout.splitlines()[-1])
 

@@ -4,7 +4,7 @@ React Native + Expo client for the existing VORQ Frappe / ERPNext / BuildSuite b
 
 ## Run locally
 
-Start the existing backend in `../integration-workspace` using that workspace's development instructions. Its API is exposed on `http://127.0.0.1:18080`.
+Start the [local backend](../README.md#iii-setting-up) from the repository root with `bash scripts/dev-up.sh`. Its API is exposed on `http://127.0.0.1:18080`.
 
 ```bash
 cd mobile
@@ -14,7 +14,7 @@ npm start -- --web --port 8082 --localhost
 
 Open `http://localhost:8082`. Browser requests go through the Expo API route at `/api/method/...`, which proxies only the approved VORQ facade and login/logout methods to the fixed upstream. The upstream defaults to `http://127.0.0.1:18080`; override it with server-only `VORQ_BACKEND_URL`. The Expo server runtime is required for this web build; static-only hosting will not serve the API route.
 
-Use the same account as VORQ desktop. Existing local development administrator credentials remain in the ignored `integration-workspace/deployment/.env`; no password is embedded in this mobile app. Accounts without company membership see access pending.
+Use the same account as VORQ desktop. Existing local development administrator credentials remain in the ignored `deployment/.env`; no password is embedded in this mobile app. Accounts without company membership see access pending.
 
 ## Android / iOS
 
@@ -36,19 +36,9 @@ Lists paginate in batches of 50. Write retries within the open form reuse an ide
 
 ## Backend compatibility patch
 
-The existing facade needed invoice defaulting and price-list fields to support clients that do not run ERPNext Desk's onchange handlers. The local integration source and running API have been updated. Because `integration-workspace/` is ignored by the parent repository, the portable source patch is tracked at `backend/invoice-defaults.patch`.
+The backend included in this repository provides invoice defaulting and price-list fields. The [invoice compatibility patch](backend/invoice-defaults.patch) is for an older, separate backend checkout that lacks those changes.
 
-For a separate clean copy of the same backend baseline:
-
-```bash
-cd integration-workspace
-patch -p1 < ../mobile/backend/invoice-defaults.patch
-docker build -f deployment/Dockerfile -t vorq/erpnext:dev .
-docker compose --env-file deployment/.env -f deployment/compose.yaml up -d --no-deps backend
-docker compose --env-file deployment/.env -f deployment/compose.yaml restart frontend
-```
-
-Do not apply the patch twice. Invoice defaults come from ERPNext controllers and an enabled price list selected in the form. Configure real customer/item/UOM/account/cost-centre and price-list masters before entering business records. No tax rate, exchange rate or financial total is fabricated by the mobile client.
+Invoice defaults come from ERPNext controllers and an enabled price list selected in the form. Configure real customer/item/UOM/account/cost-centre and price-list masters before entering business records. No tax rate, exchange rate or financial total is fabricated by the mobile client.
 
 ## Brand and icons
 
@@ -58,7 +48,7 @@ Every interface icon is an unmodified component from the official `lucide-react-
 
 ## Authentication upgrade and verification
 
-Both mobile and web now use the shared CAPTCHA → password/signup → authenticator challenge → verified Frappe-session protocol. See [the complete auth guide](../backend/auth-upgrade/README.md) for schema, recovery, RBAC approval and deployment. The previous password-only runner is superseded; `npm run test:backend` now invokes the shared live-auth acceptance suite.
+Both mobile and web now use the shared CAPTCHA → password/signup → authenticator challenge → verified Frappe-session protocol. See [the complete auth guide](../backend/auth-upgra../README.md) for schema, recovery, RBAC approval and deployment. The previous password-only runner is superseded; `npm run test:backend` now invokes the shared live-auth acceptance suite.
 
 Signup collects email, unique username, strong password, company/requested role and the details for that role. Users cannot assign themselves ERP roles or company membership. QR enrolment requires a valid TOTP before it becomes enabled. Recovery codes are shown once. Email ownership is not automatically verified by this release.
 

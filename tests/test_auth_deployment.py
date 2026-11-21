@@ -22,7 +22,7 @@ class DeploymentTests(unittest.TestCase):
  def modular_fixture(self, directory):
   root=Path(directory);source=root/'backend/auth-upgrade';target=root/'integration-workspace/apps/vorq/vorq'
   shutil.copytree(ROOT/'backend/auth-upgrade',source,ignore=shutil.ignore_patterns('__pycache__'))
-  shutil.copytree(ROOT/'integration-workspace/apps/vorq/vorq',target,ignore=shutil.ignore_patterns('__pycache__'))
+  shutil.copytree(ROOT/'apps/vorq/vorq',target,ignore=shutil.ignore_patterns('__pycache__'))
   return source,target
  def test_repeated_apply_supports_modular_source_without_rewriting_facade(self):
   with tempfile.TemporaryDirectory() as directory:

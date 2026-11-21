@@ -31,7 +31,7 @@
   <path d="M856 202.0H912" fill="none" stroke="#d6cdb9" stroke-width="1.4"/>
   <path class="flow" d="M856 202.0H912"/>
   <circle r="3.6" fill="#9b3a22"><animateMotion dur="3.2s" begin="-2.4s" repeatCount="indefinite" path="M856 202.0H912"/></circle>
-  
+
   <g>
     <rect x="60.5" y="98.5" width="228" height="84" fill="#faf6ec" stroke="#1b1915" stroke-width="1.4"/>
     <rect x="65.5" y="103.5" width="218" height="74" fill="none" stroke="#1b1915" stroke-width=".5"/>

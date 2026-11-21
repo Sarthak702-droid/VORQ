@@ -150,13 +150,22 @@ Three things to raise, in this order.
 
 <br>
 
-Start the existing backend in `integration-workspace/` using its deployment instructions. Apply the [authentication upgrade](backend/auth-upgrade/README.md) and migrate the site before using the new login flow.
+Install Docker with Compose and Python 3, then run this from the repository root.
+
+```bash
+bash scripts/dev-up.sh
+```
+
+The script builds the local backend with authentication included, starts the site and runs migrations. It stores the development administrator password in the ignored `deployment/.env`. Rerun it after backend source changes.
+
 </details>
 
 <details open>
 <summary><b>Second, the web client</b></summary>
 
 <br>
+
+Use Node.js 24 or newer.
 
 ```bash
 npm ci
@@ -213,7 +222,7 @@ The backend is a modular monolith. Business modules run inside one Frappe applic
 | `vorq/modules/` | Domain contracts and construction lifecycle rules. |
 | Application services | Coordinate access checks, scoped records and idempotency. |
 
-See [module boundaries and deployment](integration-workspace/docs/architecture/MODULAR_MONOLITH.md).
+See [module boundaries and deployment](docs/architecture/MODULAR_MONOLITH.md).
 </details>
 
 <details>
@@ -225,7 +234,9 @@ See [module boundaries and deployment](integration-workspace/docs/architecture/M
 | :-- | :-- |
 | `src/erp/` | The web ERP client, the sign-in screen and the public landing page. |
 | `mobile/` | The React Native (Expo) app. |
-| `backend/auth-upgrade/` | The authentication overlay, patch and guide for the Frappe site. |
+| `apps/vorq/` | The modular Frappe application, including authentication. |
+| `deployment/` | Docker image and Compose configuration for local development. |
+| `backend/auth-upgrade/` | Authentication protocol guide and patch for older backend checkouts. |
 | `tests/` | Auth, architecture and live verification suites. |
 | `docs/` | Product, architecture and UI specifications, and the test report. |
 | `public/plates/` | The 1762 engravings. |

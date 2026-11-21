@@ -10,3 +10,13 @@ integration-workspace
 
 __pycache__/
 *.py[cod]
+
+vendor/
+.test-output/
+
+# Backups and recovery files
+recovery/
+*.sql
+*.sql.gz
+*.tar
+*site_config*.json

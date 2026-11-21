@@ -1,6 +1,6 @@
 # VORQ authentication upgrade
 
-This is the durable source overlay for the existing Frappe v16 VORQ backend in the ignored `integration-workspace/`. The main web client is now tracked under the repository's `src/erp/`; mobile uses the same server account and MFA endpoints.
+The [included VORQ backend](../../apps/vorq/) ships with this authentication flow. Follow the [repository setup instructions](../../README.md#iii-setting-up) to build and migrate it. The overlay in this directory supports older backends kept in a separate `integration-workspace/` checkout.
 
 ## Audit result
 
@@ -32,7 +32,7 @@ The image includes random placement, rotation, lines and noise; it is server-gen
 
 Native SIDs stay in Expo SecureStore; browser SIDs stay in HttpOnly cookies. Passwords, pending challenges, QR keys and displayed recovery codes are not put in application storage. Serve both clients and API over HTTPS before public deployment. Configure trusted-proxy client IP attribution at the gateway: untrusted forwarded-IP headers must never be accepted as rate-limit identity. The local development proxies currently share an IP budget, so repeated automated tests can correctly hit the limits.
 
-## Apply and migrate
+## Apply and migrate a legacy checkout
 
 Start the existing local MariaDB and Redis services first. The invoice-compatible backend baseline from the earlier mobile integration must be present.
 

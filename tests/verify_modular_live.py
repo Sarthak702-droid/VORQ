@@ -10,7 +10,7 @@ qa_lock=open('/tmp/vorq-local-live-tests.lock','a')
 fcntl.flock(qa_lock,fcntl.LOCK_EX)
 
 ROOT=Path(__file__).resolve().parents[1]
-workspace=ROOT/'integration-workspace'
+workspace=ROOT
 compose=['docker','compose','--env-file','deployment/.env','-f','deployment/compose.yaml']
 source=(ROOT/'tests/live_modular_cases.py').read_text()
 bootstrap="import os\nos.chdir('/home/frappe/frappe-bench/sites')\nimport frappe\nfrappe.init(site='frontend');frappe.connect()\nassert frappe.local.site == 'frontend'\n"

@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[1]
-BACKEND = ROOT / 'integration-workspace/apps/vorq'
+BACKEND = ROOT / 'apps/vorq'
 PACKAGE = BACKEND / 'vorq'
 
 

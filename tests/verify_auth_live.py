@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
-COMPOSE = ['docker','compose','--env-file',str(ROOT/'integration-workspace/deployment/.env'),'-f',str(ROOT/'integration-workspace/deployment/compose.yaml')]
+COMPOSE = ['docker','compose','--env-file',str(ROOT/'deployment/.env'),'-f',str(ROOT/'deployment/compose.yaml')]
 BASE='http://127.0.0.1:18080/api/method/'
 jar=http.cookiejar.CookieJar(); client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
 def call(method, args=None):

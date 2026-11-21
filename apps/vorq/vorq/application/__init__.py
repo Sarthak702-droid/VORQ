@@ -1,0 +1,1 @@
+"""VORQ modular monolith package."""
