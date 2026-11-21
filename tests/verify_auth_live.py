@@ -74,7 +74,27 @@ logout(session['csrf_token']);denied(lambda:call('vorq.api.v1.session'));result[
 again=call('vorq.api.v1.auth_start',{'usr':username,'pwd':password,**captcha()});assert again['stage']=='totp' and 'setup_key' not in again;result['username_login']=True
 # An already-used time counter cannot authenticate a second session.
 denied(lambda:call('vorq.api.v1.auth_finish',{'challenge_token':again['challenge'],'code':used_code}));result['totp_replay_rejected']=True
+def restrict_login(restricted):
+    bench(f"""import json
+from frappe.utils import now_datetime
+email={email!r}
+assert email.startswith('vorq-auth-test-') and email.endswith('@example.invalid')
+hour=now_datetime().hour
+frappe.db.set_value('User',email,{{
+    'login_before': 1 if {restricted!r} and hour else 0,
+    'login_after': 1 if {restricted!r} and not hour else 0,
+}})
+frappe.db.commit()
+print(json.dumps(True))""")
+try:
+    restrict_login(True)
+    denied(lambda:call('vorq.api.v1.auth_finish',{'challenge_token':again['challenge'],'code':backups[0]}))
+finally:
+    restrict_login(False)
+denied(lambda:call('vorq.api.v1.session'))
+again=call('vorq.api.v1.auth_start',{'usr':username,'pwd':password,**captcha()})
 signed=call('vorq.api.v1.auth_finish',{'challenge_token':again['challenge'],'code':backups[0]});assert signed['authenticated'] and signed['recovery_codes']==[]
+result['failed_session_preserves_recovery_code']=True
 session=call('vorq.api.v1.session');logout(session['csrf_token'])
 last=call('vorq.api.v1.auth_start',{'usr':email,'pwd':password,**captcha()});denied(lambda:call('vorq.api.v1.auth_finish',{'challenge_token':last['challenge'],'code':backups[0]}));result['recovery_code_single_use']=True
 call('vorq.api.v1.auth_finish',{'challenge_token':last['challenge'],'code':backups[1]});session=call('vorq.api.v1.session');logout(session['csrf_token'])

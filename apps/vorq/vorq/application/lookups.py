@@ -9,7 +9,7 @@ def lookup(doctype, company, project=None, query=""):
     role = member(company)
     masters = {"Customer", "Supplier", "Item", "Warehouse", "UOM", "Item Group", "Supplier Group", "Customer Group", "Territory", "Employee", "Account", "Cost Center", "Stock Entry Type", "Price List"}
     scoped = {"Task", "BOQ", "BOQ Group", "Subcontractor Work Order", "Purchase Order", "Purchase Receipt", "Material Request", "Sales Invoice", "Purchase Invoice"}
-    if doctype not in masters | scoped:
+    if not isinstance(doctype, str) or doctype not in masters | scoped:
         frappe.throw("Lookup is not available for this field.", frappe.PermissionError)
     financial_doctypes = {CATALOG[key][0] for key in FINANCIAL} | {"Account"}
     if doctype in financial_doctypes and role not in {"Owner", "Accountant"}:

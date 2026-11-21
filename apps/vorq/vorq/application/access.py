@@ -52,22 +52,22 @@ def _scope(doc, company, project):
     project_access(project, company)
     if doc.meta.has_field("company") and doc.company != company:
         frappe.throw("Record company mismatch.", frappe.PermissionError)
-    if doc.meta.has_field("project"):
-        if doc.project != project:
-            frappe.throw("Record project mismatch.", frappe.PermissionError)
-    else:
+    has_project = doc.meta.has_field("project")
+    if has_project and doc.project != project:
+        frappe.throw("Record project mismatch.", frappe.PermissionError)
+    if doc.doctype == "Payment Entry":
+        references = doc.get("references") or []
+        if not references:
+            frappe.throw("Payments must reference project invoices.", frappe.ValidationError)
+        for row in references:
+            if row.reference_doctype not in {"Sales Invoice", "Purchase Invoice"}:
+                frappe.throw("Only invoice settlements are supported.", frappe.ValidationError)
+            invoice = frappe.get_doc(row.reference_doctype, row.reference_name)
+            invoice.check_permission("read")
+            _scope(invoice, company, project)
+    elif not has_project:
         rows = list(doc.get("items") or doc.get("accounts") or [])
-        if doc.doctype == "Payment Entry":
-            rows = list(doc.get("references") or [])
-            if not rows:
-                frappe.throw("Payments must reference project invoices.", frappe.ValidationError)
-            for row in rows:
-                if row.reference_doctype not in {"Sales Invoice", "Purchase Invoice"}:
-                    frappe.throw("Only invoice settlements are supported.", frappe.ValidationError)
-                ref = frappe.get_doc(row.reference_doctype, row.reference_name)
-                ref.check_permission("read")
-                _scope(ref, company, project)
-        elif not rows or any(r.get("project") != project for r in rows):
+        if not rows or any(row.get("project") != project for row in rows):
             frappe.throw("Every transaction line must belong to this project.", frappe.PermissionError)
     # Cross-project links cannot smuggle quantities/measurements into another project.
     for field in doc.meta.fields:

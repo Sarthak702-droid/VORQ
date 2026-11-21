@@ -12,7 +12,7 @@ def run(invoice_name="ACC-PINV-2026-00001"):
     invoice = frappe.get_doc("Purchase Invoice", invoice_name)
     if invoice.company != "VORQ Development" or invoice.docstatus != 1:
         frappe.throw("Only a submitted VORQ development invoice is allowed.")
-    if Decimal(str(invoice.outstanding_amount)) != Decimal("1000"):
+    if invoice.currency != "INR" or Decimal(str(invoice.outstanding_amount)) != Decimal("1000"):
         frappe.throw("The approved test requires exactly INR 1000 outstanding.")
     from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
     cash = frappe.db.get_value("Account", {"company": invoice.company, "account_type": "Cash", "is_group": 0}, "name")

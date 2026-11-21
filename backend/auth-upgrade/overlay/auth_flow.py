@@ -163,7 +163,11 @@ def finish(challenge_token, code):
         pending = _take('pending', challenge_token)
         if not pending or pending['expires'] < time.time() or pending['attempts'] >= 5:
             frappe.throw('Verification expired. Start sign-in again.', frappe.AuthenticationError)
-        user = pending['user']
+    user = pending['user']
+    # Frappe commits while creating its session, so a row lock alone cannot
+    # serialize verification through both the session and factor updates.
+    lock_key = PREFIX + 'lock:user:' + _hash(user)
+    with frappe.cache.lock(lock_key, timeout=60, blocking_timeout=5) as user_lock:
         if user != 'Administrator' and not frappe.db.get_value('User',user,'enabled'):
             frappe.throw('Account is disabled.', frappe.AuthenticationError)
         profile = _profile(user)
@@ -195,21 +199,34 @@ def finish(challenge_token, code):
             pending['attempts']+=1
             if pending['attempts']<5: _put('pending',challenge_token,pending,max(1,int(pending['expires']-time.time())))
             frappe.throw('Code is incorrect, expired or already used.', frappe.AuthenticationError)
-        if pending['enroll']:
-            profile.totp_secret=secret; profile.totp_enabled=1
-            recovery_codes=[secrets.token_hex(10) for _ in range(8)]
-            profile.recovery_hashes=json.dumps([_digest(value) for value in recovery_codes])
-        elif backup_index is not None:
-            hashes.pop(backup_index); profile.recovery_hashes=json.dumps(hashes)
-        if matched is not None: profile.last_counter=matched
-        profile.save(ignore_permissions=True)
-        frappe.cache.delete_value(failure_key)
-        frappe.db.commit()
-        # Frappe issues/rotates the actual session only AFTER factor verification.
-        frappe.local.login_manager.login_as(user)
-        sid_hash=_hash(str(frappe.session.sid))
-        frappe.get_doc({'doctype':'VORQ Auth Session','name':sid_hash,'user':user,'expires_at':add_to_date(now_datetime(),hours=12)}).insert(ignore_permissions=True,set_name=sid_hash)
-        frappe.db.commit()
+        login_manager = frappe.local.login_manager
+        try:
+            # Keep the recovery data intact until Frappe accepts the login.
+            login_manager.login_as(user)
+            frappe.db.sql('SELECT name FROM `tabVORQ Auth Profile` WHERE name=%s FOR UPDATE', profile.name)
+            if not user_lock.owned():
+                frappe.throw('Verification expired. Start sign-in again.', frappe.AuthenticationError)
+            if pending['enroll']:
+                profile.totp_secret=secret; profile.totp_enabled=1
+                recovery_codes=[secrets.token_hex(10) for _ in range(8)]
+                profile.recovery_hashes=json.dumps([_digest(value) for value in recovery_codes])
+            elif backup_index is not None:
+                hashes.pop(backup_index); profile.recovery_hashes=json.dumps(hashes)
+            if matched is not None: profile.last_counter=matched
+            profile.save(ignore_permissions=True)
+            sid_hash = _hash(str(frappe.session.sid))
+            frappe.get_doc({'doctype':'VORQ Auth Session','name':sid_hash,'user':user,'expires_at':add_to_date(now_datetime(),hours=12)}).insert(ignore_permissions=True,set_name=sid_hash)
+            frappe.cache.delete_value(failure_key)
+            frappe.db.commit()
+        except Exception:
+            # Session creation can commit independently of the VORQ writes.
+            frappe.db.rollback()
+            if frappe.session.user == user and frappe.session.sid:
+                try:
+                    login_manager.logout()
+                finally:
+                    login_manager.clear_cookies()
+            raise
     return {'authenticated':True,'recovery_codes':recovery_codes,'access':'pending_review' if profile.access_status=='Pending review' else 'existing_membership','expires_in':43200}
 
 def prepare_schema():

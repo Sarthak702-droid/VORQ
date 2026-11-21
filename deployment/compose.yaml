@@ -97,6 +97,7 @@ services:
         fi;
         bench --site frontend install-app buildsuite_core;
         bench --site frontend install-app vorq;
+        bench --site frontend execute vorq.install.ensure_unique_constraints;
         bench --site frontend set-config developer_mode 1;
         bench --site frontend enable-scheduler;
 

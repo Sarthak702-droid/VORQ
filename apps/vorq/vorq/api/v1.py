@@ -56,7 +56,7 @@ def lookup(doctype, company, project=None, query=""):
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def signup(full_name, email, password):
-    """Register an unprivileged identity; workspace access requires verified membership."""
+    """Reject legacy registration. Use auth_signup to enrol an authenticator."""
     from vorq.registration import register
     return register(full_name, email, password)
 

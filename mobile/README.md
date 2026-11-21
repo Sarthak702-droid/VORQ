@@ -48,7 +48,7 @@ Every interface icon is an unmodified component from the official `lucide-react-
 
 ## Authentication upgrade and verification
 
-Both mobile and web now use the shared CAPTCHA → password/signup → authenticator challenge → verified Frappe-session protocol. See [the complete auth guide](../backend/auth-upgra../README.md) for schema, recovery, RBAC approval and deployment. The previous password-only runner is superseded; `npm run test:backend` now invokes the shared live-auth acceptance suite.
+Both mobile and web now use the shared CAPTCHA → password/signup → authenticator challenge → verified Frappe-session protocol. See [the complete auth guide](../backend/auth-upgrade/README.md) for schema, recovery, RBAC approval and deployment. The previous password-only runner is superseded; `npm run test:backend` now invokes the shared live-auth acceptance suite.
 
 Signup collects email, unique username, strong password, company/requested role and the details for that role. Users cannot assign themselves ERP roles or company membership. QR enrolment requires a valid TOTP before it becomes enabled. Recovery codes are shown once. Email ownership is not automatically verified by this release.
 
