@@ -8,3 +8,10 @@ vendor/
 deployment/.env
 __pycache__/
 *.pyc
+
+# Backups and recovery files
+recovery/
+*.sql
+*.sql.gz
+*.tar
+*site_config*.json
