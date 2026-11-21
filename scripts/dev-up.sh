@@ -11,9 +11,9 @@ PY
 fi
 [ -d vendor/buildsuite_core ] || bash scripts/fetch-upstreams.sh
 docker build -f deployment/Dockerfile -t vorq/erpnext:dev .
+# The backend dependency waits for create-site to exit successfully.
 docker compose --env-file deployment/.env -f deployment/compose.yaml up -d
 # Existing sites also need new DocTypes/hooks when the application image changes.
-docker compose --env-file deployment/.env -f deployment/compose.yaml wait create-site
 docker compose --env-file deployment/.env -f deployment/compose.yaml exec -T backend bench --site frontend migrate
 docker compose --env-file deployment/.env -f deployment/compose.yaml restart backend queue-long queue-short scheduler
 # Nginx resolves upstream addresses at startup; backend restart can change its IP.
