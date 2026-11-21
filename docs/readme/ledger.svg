@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 486" width="1200" height="486" role="img" aria-labelledby="t d">
+  <title id="t">One BOQ line followed through VORQ</title>
+  <desc id="d">Estimate: BOQ item 4.2, brick masonry 230 mm, 184.00 cum, ₹11,86,800. Purchasing: purchase order to the brick supplier, 92,000 nos, ₹8,28,000. Stores: received at the site store so far, 30,000 nos. Site report: masonry completed to date, 62.50 cum. Billing: included in running bill no. 3, 48.00 cum, ₹3,09,600. Figures are illustrative.</desc>
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7"/>
+      <feColorMatrix values="0 0 0 0 .36  0 0 0 0 .28  0 0 0 0 .15  0 0 0 .1 0"/>
+    </filter>
+    <style>
+      .serif { font-family: 'Libre Caslon Text','Libre Caslon Display','Big Caslon','Hoefler Text',Georgia,'Times New Roman',serif; }
+      .head { font: 600 12.5px Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; letter-spacing: 2.6px; fill: #6a6558; }
+      .num { font: 500 17px ui-monospace,'SF Mono',Menlo,Consolas,monospace; fill: #1b1915; }
+      .row { animation: write 15s cubic-bezier(.22,.7,.2,1) infinite both; }
+      @keyframes write {
+        0% { opacity: 0; transform: translateX(-10px); }
+        5% { opacity: 1; transform: none; }
+        80% { opacity: 1; }
+        85%, 100% { opacity: 0; transform: none; }
+      }
+      .line { fill: none; stroke: #d6cdb9; stroke-width: 1; stroke-dasharray: 1080;
+              animation: rule 15s cubic-bezier(.22,.7,.2,1) infinite both; }
+      @keyframes rule {
+        0% { stroke-dashoffset: 1080; }
+        7%, 80% { stroke-dashoffset: 0; opacity: 1; }
+        85%, 100% { stroke-dashoffset: 0; opacity: 0; }
+      }
+      .pen { animation: pen 15s linear infinite both; }
+      @keyframes pen {
+        0%, 6% { transform: translateY(0); opacity: 0; }
+        7% { transform: translateY(0); opacity: 1; }
+        16%, 17% { transform: translateY(50px); }
+        26%, 27% { transform: translateY(100px); }
+        36%, 37% { transform: translateY(150px); }
+        46% { transform: translateY(200px); opacity: 1; }
+        56%, 100% { transform: translateY(200px); opacity: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    </style>
+  </defs>
+  <rect width="1200" height="486" fill="#faf6ec"/>
+  <rect width="1200" height="486" filter="url(#grain)"/>
+  <rect x="14.5" y="14.5" width="1171" height="457" fill="none" stroke="#1b1915" stroke-width="1.5"/>
+  <rect x="21.5" y="21.5" width="1157" height="443" fill="none" stroke="#1b1915" stroke-width=".6"/>
+  <text class="serif" x="64" y="78" font-size="30" fill="#1b1915">One line of the estimate, followed through the books</text>
+  <text class="head" x="72" y="136">STAGE</text>
+  <text class="head" x="254" y="136">ENTRY</text>
+  <text class="head" x="890" y="136" text-anchor="end">QUANTITY</text>
+  <text class="head" x="1128" y="136" text-anchor="end">AMOUNT</text>
+  <path d="M64 150H1136" stroke="#1b1915" stroke-width="1.4"/>
+  <circle class="pen" cx="50" cy="176" r="3.5" fill="#9b3a22"/>
+  <g class="row" style="animation-delay:1.0s">
+    <text class="serif" x="72" y="182" font-size="19" font-style="italic" fill="#9b3a22">Estimate</text>
+    <text class="serif" x="254" y="182" font-size="19" fill="#1b1915">BOQ item 4.2, brick masonry 230 mm</text>
+    <text class="num" x="890" y="182" text-anchor="end">184.00 cum</text>
+    <text class="num" x="1128" y="182" text-anchor="end">₹11,86,800</text>
+  </g>
+  <path class="line" style="animation-delay:1.0s" d="M64 200H1136"/>
+  <g class="row" style="animation-delay:2.5s">
+    <text class="serif" x="72" y="232" font-size="19" font-style="italic" fill="#9b3a22">Purchasing</text>
+    <text class="serif" x="254" y="232" font-size="19" fill="#1b1915">Purchase order to the brick supplier</text>
+    <text class="num" x="890" y="232" text-anchor="end">92,000 nos</text>
+    <text class="num" x="1128" y="232" text-anchor="end">₹8,28,000</text>
+  </g>
+  <path class="line" style="animation-delay:2.5s" d="M64 250H1136"/>
+  <g class="row" style="animation-delay:4.0s">
+    <text class="serif" x="72" y="282" font-size="19" font-style="italic" fill="#9b3a22">Stores</text>
+    <text class="serif" x="254" y="282" font-size="19" fill="#1b1915">Received at the site store so far</text>
+    <text class="num" x="890" y="282" text-anchor="end">30,000 nos</text>
+    <text class="num" x="1128" y="282" text-anchor="end"></text>
+  </g>
+  <path class="line" style="animation-delay:4.0s" d="M64 300H1136"/>
+  <g class="row" style="animation-delay:5.5s">
+    <text class="serif" x="72" y="332" font-size="19" font-style="italic" fill="#9b3a22">Site report</text>
+    <text class="serif" x="254" y="332" font-size="19" fill="#1b1915">Masonry completed to date</text>
+    <text class="num" x="890" y="332" text-anchor="end">62.50 cum</text>
+    <text class="num" x="1128" y="332" text-anchor="end"></text>
+  </g>
+  <path class="line" style="animation-delay:5.5s" d="M64 350H1136"/>
+  <g class="row" style="animation-delay:7.0s">
+    <text class="serif" x="72" y="382" font-size="19" font-style="italic" fill="#9b3a22">Billing</text>
+    <text class="serif" x="254" y="382" font-size="19" fill="#1b1915">Included in running bill no. 3</text>
+    <text class="num" x="890" y="382" text-anchor="end">48.00 cum</text>
+    <text class="num" x="1128" y="382" text-anchor="end">₹3,09,600</text>
+  </g>
+  <path class="line" style="animation-delay:7.0s" d="M64 400H1136"/>
+  <text class="serif" x="64" y="438" font-size="14.5" font-style="italic" fill="#6a6558">Figures are invented for the example: 184 cum at ₹6,450, and about 500 bricks to the cum at ₹9 each.</text>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 36" width="1200" height="36" role="presentation" aria-hidden="true">
+  <style>
+    .l { stroke: #9a8f76; stroke-width: 1; stroke-dasharray: 500; animation: d 1.6s cubic-bezier(.22,.7,.2,1) both; }
+    @keyframes d { from { stroke-dashoffset: 500; } }
+    .k { transform-origin: 600px 18px; animation: t 9s ease-in-out infinite; }
+    @keyframes t { 0%, 80%, 100% { transform: rotate(0); } 90% { transform: rotate(180deg); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <path class="l" d="M572 18H80"/>
+  <path class="l" d="M628 18H1120"/>
+  <circle cx="580" cy="18" r="1.6" fill="#9a8f76"/><circle cx="620" cy="18" r="1.6" fill="#9a8f76"/>
+  <g class="k"><path d="M600 7l9 11-9 11-9-11z" fill="#9b3a22"/></g>
+</svg>

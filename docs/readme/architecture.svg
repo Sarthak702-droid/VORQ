@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 384" width="1200" height="384" role="img" aria-labelledby="t d">
+  <title id="t">How VORQ is put together</title>
+  <desc id="d">The React web client and the React Native mobile app both call the vorq.api.v1 facade. The facade calls the business modules under vorq/modules, which run inside one Frappe v16 application alongside ERPNext v16 and BuildSuite and share one tenant database.</desc>
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7"/>
+      <feColorMatrix values="0 0 0 0 .36  0 0 0 0 .28  0 0 0 0 .15  0 0 0 .1 0"/>
+    </filter>
+    <style>
+      .serif { font-family: 'Libre Caslon Text','Libre Caslon Display','Big Caslon','Hoefler Text',Georgia,'Times New Roman',serif; }
+      .label { font: 600 12.5px Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; letter-spacing: 2.6px; fill: #9b3a22; }
+      .flow { fill: none; stroke: #1b1915; stroke-width: 1.4; stroke-dasharray: 5 7; animation: march 1.1s linear infinite; }
+      @keyframes march { to { stroke-dashoffset: -24; } }
+      @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    </style>
+  </defs>
+  <rect width="1200" height="384" fill="#f3eee2"/>
+  <rect width="1200" height="384" filter="url(#grain)"/>
+  <rect x="14.5" y="14.5" width="1171" height="355" fill="none" stroke="#1b1915" stroke-width="1.5"/>
+  <rect x="21.5" y="21.5" width="1157" height="341" fill="none" stroke="#1b1915" stroke-width=".6"/>
+  <text class="label" x="60" y="70">FIG. 2 · A MODULAR MONOLITH</text>
+  <path d="M288 140.0C318 140.0 314 202.0 344 202.0" fill="none" stroke="#d6cdb9" stroke-width="1.4"/>
+  <path class="flow" d="M288 140.0C318 140.0 314 202.0 344 202.0"/>
+  <circle r="3.6" fill="#9b3a22"><animateMotion dur="3.2s" begin="-0.0s" repeatCount="indefinite" path="M288 140.0C318 140.0 314 202.0 344 202.0"/></circle>
+  <path d="M288 264.0C318 264.0 314 202.0 344 202.0" fill="none" stroke="#d6cdb9" stroke-width="1.4"/>
+  <path class="flow" d="M288 264.0C318 264.0 314 202.0 344 202.0"/>
+  <circle r="3.6" fill="#9b3a22"><animateMotion dur="3.2s" begin="-0.8s" repeatCount="indefinite" path="M288 264.0C318 264.0 314 202.0 344 202.0"/></circle>
+  <path d="M572 202.0H628" fill="none" stroke="#d6cdb9" stroke-width="1.4"/>
+  <path class="flow" d="M572 202.0H628"/>
+  <circle r="3.6" fill="#9b3a22"><animateMotion dur="3.2s" begin="-1.6s" repeatCount="indefinite" path="M572 202.0H628"/></circle>
+  <path d="M856 202.0H912" fill="none" stroke="#d6cdb9" stroke-width="1.4"/>
+  <path class="flow" d="M856 202.0H912"/>
+  <circle r="3.6" fill="#9b3a22"><animateMotion dur="3.2s" begin="-2.4s" repeatCount="indefinite" path="M856 202.0H912"/></circle>
+  
+  <g>
+    <rect x="60.5" y="98.5" width="228" height="84" fill="#faf6ec" stroke="#1b1915" stroke-width="1.4"/>
+    <rect x="65.5" y="103.5" width="218" height="74" fill="none" stroke="#1b1915" stroke-width=".5"/>
+    <text class="serif" x="174.0" y="138.0" text-anchor="middle" font-size="21" fill="#1b1915">Web client</text>
+    <text class="serif" x="174.0" y="162.0" text-anchor="middle" font-size="14.5" font-style="italic" fill="#6a6558">React, Vite</text>
+  </g>
+  <g>
+    <rect x="60.5" y="222.5" width="228" height="84" fill="#faf6ec" stroke="#1b1915" stroke-width="1.4"/>
+    <rect x="65.5" y="227.5" width="218" height="74" fill="none" stroke="#1b1915" stroke-width=".5"/>
+    <text class="serif" x="174.0" y="262.0" text-anchor="middle" font-size="21" fill="#1b1915">Mobile app</text>
+    <text class="serif" x="174.0" y="286.0" text-anchor="middle" font-size="14.5" font-style="italic" fill="#6a6558">React Native, Expo</text>
+  </g>
+  <g>
+    <rect x="344.5" y="160.5" width="228" height="84" fill="#faf6ec" stroke="#9b3a22" stroke-width="1.4"/>
+    <rect x="349.5" y="165.5" width="218" height="74" fill="none" stroke="#9b3a22" stroke-width=".5"/>
+    <text class="serif" x="458.0" y="200.0" text-anchor="middle" font-size="21" fill="#1b1915">vorq.api.v1</text>
+    <text class="serif" x="458.0" y="224.0" text-anchor="middle" font-size="14.5" font-style="italic" fill="#6a6558">one facade for both</text>
+  </g>
+  <g>
+    <rect x="628.5" y="160.5" width="228" height="84" fill="#faf6ec" stroke="#1b1915" stroke-width="1.4"/>
+    <rect x="633.5" y="165.5" width="218" height="74" fill="none" stroke="#1b1915" stroke-width=".5"/>
+    <text class="serif" x="742.0" y="200.0" text-anchor="middle" font-size="21" fill="#1b1915">vorq/modules</text>
+    <text class="serif" x="742.0" y="224.0" text-anchor="middle" font-size="14.5" font-style="italic" fill="#6a6558">contracts and lifecycle rules</text>
+  </g>
+  <g>
+    <rect x="912.5" y="160.5" width="228" height="84" fill="#faf6ec" stroke="#1b1915" stroke-width="1.4"/>
+    <rect x="917.5" y="165.5" width="218" height="74" fill="none" stroke="#1b1915" stroke-width=".5"/>
+    <text class="serif" x="1026.0" y="200.0" text-anchor="middle" font-size="21" fill="#1b1915">Frappe v16</text>
+    <text class="serif" x="1026.0" y="224.0" text-anchor="middle" font-size="14.5" font-style="italic" fill="#6a6558">ERPNext v16, BuildSuite</text>
+  </g>
+  <text class="serif" x="628" y="278" font-size="14.5" font-style="italic" fill="#6a6558">One application, one transaction boundary, one tenant database.</text>
+</svg>

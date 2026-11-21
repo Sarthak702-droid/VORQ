@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" role="img" aria-labelledby="t d">
+  <title id="t">VORQ</title>
+  <desc id="d">BOQ to final bill, on one record. An arch is laid stone by stone and locked by a red keystone.</desc>
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="7"/>
+      <feColorMatrix values="0 0 0 0 .36  0 0 0 0 .28  0 0 0 0 .15  0 0 0 .1 0"/>
+    </filter>
+    <style>
+      .serif { font-family: 'Libre Caslon Text','Libre Caslon Display','Big Caslon','Hoefler Text',Georgia,'Times New Roman',serif; }
+      .label { font: 600 14px Inter,'Helvetica Neue',Helvetica,Arial,sans-serif; letter-spacing: 3.2px; fill: #9b3a22; }
+      .rise { animation: rise .9s cubic-bezier(.22,.7,.2,1) both; }
+      @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+      .rule { stroke-dasharray: 620; animation: draw 1.4s .5s cubic-bezier(.22,.7,.2,1) both; }
+      @keyframes draw { from { stroke-dashoffset: 620; } }
+      .centering { stroke-dasharray: 3 5; animation: march 1.6s linear infinite; }
+      @keyframes march { to { stroke-dashoffset: -16; } }
+      .stone { fill: #faf6ec; stroke: #1b1915; stroke-width: 1.4; stroke-linejoin: round;
+               animation: lay 16s cubic-bezier(.22,.7,.2,1) infinite both; }
+      @keyframes lay {
+        0% { opacity: 0; transform: translateY(-16px); }
+        3% { opacity: 1; transform: none; }
+        84% { opacity: 1; transform: none; }
+        88%, 100% { opacity: 0; transform: translateY(-16px); }
+      }
+      .hatch { animation: ink 16s infinite both; }
+      @keyframes ink { 0%, 26% { opacity: 0; } 32%, 84% { opacity: 1; } 88%, 100% { opacity: 0; } }
+      .key { fill: #9b3a22; stroke: #1b1915; stroke-width: 1.4; stroke-linejoin: round;
+             animation: drop 16s cubic-bezier(.3,1.3,.5,1) infinite both; }
+      @keyframes drop {
+        0%, 25% { opacity: 0; transform: translateY(-70px); }
+        27% { opacity: 1; transform: translateY(-70px); }
+        31% { opacity: 1; transform: none; }
+        84% { opacity: 1; transform: none; }
+        88%, 100% { opacity: 0; transform: translateY(-70px); }
+      }
+      .fig { animation: ink 16s infinite both; }
+      @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    </style>
+  </defs>
+  <rect width="1200" height="470" fill="#f3eee2"/>
+  <rect width="1200" height="470" filter="url(#grain)"/>
+  <rect x="14.5" y="14.5" width="1171" height="441" fill="none" stroke="#1b1915" stroke-width="1.5"/>
+  <rect x="21.5" y="21.5" width="1157" height="427" fill="none" stroke="#1b1915" stroke-width=".6"/>
+
+  <!-- Fig. 1: the arch -->
+  <g fill="none" stroke="#1b1915" stroke-width="1.4">
+    <g fill="#faf6ec"><rect x="112" y="298" width="50" height="62" /><path d="M112 318.7h50"/><path d="M112 339.3h50"/><rect x="338" y="298" width="50" height="62" /><path d="M338 318.7h50"/><path d="M338 339.3h50"/></g>
+    <path d="M78 360H422" stroke-width="1.6"/>
+    <path d="M78 365H422" stroke-width=".6"/>
+    <path class="centering" stroke="#6a6558" stroke-width="1" d="M168 298A82 82 0 0 1 332 298"/>
+    <path stroke="#6a6558" stroke-width=".8" d="M243 298h14M250 291v14"/>
+  </g>
+    <path class="stone" style="animation-delay:1.20s" d="M338.0 298.0L388.0 298.0A138 138 0 0 0 379.7 250.8L332.7 267.9A88 88 0 0 1 338.0 298.0Z"/>
+  <path class="stone" style="animation-delay:1.52s" d="M167.3 267.9L120.3 250.8A138 138 0 0 0 112.0 298.0L162.0 298.0A88 88 0 0 1 167.3 267.9Z"/>
+  <path class="stone" style="animation-delay:1.84s" d="M332.7 267.9L379.7 250.8A138 138 0 0 0 355.7 209.3L317.4 241.4A88 88 0 0 1 332.7 267.9Z"/>
+  <path class="stone" style="animation-delay:2.16s" d="M182.6 241.4L144.3 209.3A138 138 0 0 0 120.3 250.8L167.3 267.9A88 88 0 0 1 182.6 241.4Z"/>
+  <path class="stone" style="animation-delay:2.48s" d="M317.4 241.4L355.7 209.3A138 138 0 0 0 319.0 178.5L294.0 221.8A88 88 0 0 1 317.4 241.4Z"/>
+  <path class="stone" style="animation-delay:2.80s" d="M206.0 221.8L181.0 178.5A138 138 0 0 0 144.3 209.3L182.6 241.4A88 88 0 0 1 206.0 221.8Z"/>
+  <path class="stone" style="animation-delay:3.12s" d="M294.0 221.8L319.0 178.5A138 138 0 0 0 274.0 162.1L265.3 211.3A88 88 0 0 1 294.0 221.8Z"/>
+  <path class="stone" style="animation-delay:3.44s" d="M234.7 211.3L226.0 162.1A138 138 0 0 0 181.0 178.5L206.0 221.8A88 88 0 0 1 234.7 211.3Z"/>
+  <path class="hatch" fill="none" stroke="#1b1915" stroke-width=".6" d="M373.5 287.2L384.5 286.2M372.1 276.5L382.9 274.6M369.8 265.9L380.4 263.1M362.4 245.6L372.4 240.9M357.4 236.0L366.9 230.5M351.6 226.9L360.6 220.6M337.7 210.3L345.5 202.5M329.7 203.0L336.8 194.6M321.1 196.4L327.4 187.4M302.4 185.6L307.1 175.6M292.4 181.5L296.2 171.1M282.1 178.2L284.9 167.6M217.9 178.2L215.1 167.6M207.6 181.5L203.8 171.1M197.6 185.6L192.9 175.6M178.9 196.4L172.6 187.4M170.3 203.0L163.2 194.6M162.3 210.3L154.5 202.5M148.4 226.9L139.4 220.6M142.6 236.0L133.1 230.5M137.6 245.6L127.6 240.9M130.2 265.9L119.6 263.1M127.9 276.5L117.1 274.6M126.5 287.2L115.5 286.2"/>
+  <path class="key" d="M263.9 219.2L276.4 148.3A152 152 0 0 0 223.6 148.3L236.1 219.2A80 80 0 0 1 263.9 219.2Z"/>
+  <text class="serif fig" x="250" y="394" text-anchor="middle" font-size="14.5" font-style="italic" fill="#6a6558">Fig. 1. The keystone goes in last and locks the rest.</text>
+
+  <!-- Title -->
+  <g transform="translate(476 0)">
+    <text class="label rise" x="2" y="138">FOR RESIDENTIAL CONTRACTORS</text>
+    <text class="serif rise" style="animation-delay:.12s" x="-4" y="248" font-size="118" letter-spacing="19" fill="#1b1915">VORQ</text>
+    <path class="rule" d="M2 280H622" stroke="#1b1915" stroke-width="1.2" fill="none"/>
+    <text class="serif rise" style="animation-delay:.3s" x="0" y="330" font-size="35" fill="#1b1915">BOQ to final bill, on one record.</text>
+    <text class="serif rise" style="animation-delay:.45s" x="1" y="368" font-size="17.5" font-style="italic" fill="#4a463d">Construction operations and billing, in the browser and on the phone.</text>
+  </g>
+</svg>
